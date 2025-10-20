@@ -8,7 +8,6 @@ from typing import List, Optional, Dict, Tuple, Any
 from models.person import Person
 from utils.date_utils import parse_date
 
-
 # Example: load person data from a simple JSON structure
 def person_from_dict(d: Dict[str, Any], persons_cache: Dict[str, Person] = None) -> Person:
     # persons_cache helps resolve references (parents/spouse) by name in the same payload

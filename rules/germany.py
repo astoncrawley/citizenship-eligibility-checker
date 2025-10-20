@@ -6,21 +6,6 @@ from models.citizenship import AcquisitionMethod
 from models.person import Person
 from models.results import RuleResult
 
-def parents_were_married_at_birth(child: Person, parent1: Person, parent2: Person) -> bool:
-    for marriage in parent1.marriages:
-        if marriage.spouse == parent2 and marriage.is_active_on(child.date_of_birth):
-            return True
-    for marriage in parent2.marriages:
-        if marriage.spouse == parent1 and marriage.is_active_on(child.date_of_birth):
-            return True
-    return False
-
-# def married_at_time_of_birth(date_of_birth, parents_marriage_date):
-#     if date_of_birth > parents_marriage_date:
-#         return True
-#     else:
-#         return False
-
 class GermanCitizenshipRule(BaseRule):
     """
     Implements German nationality law (simplified but realistic logic):
@@ -39,7 +24,6 @@ class GermanCitizenshipRule(BaseRule):
                 
         # Check descent
         for parent in person.parents:
-            
             for citizenship in parent.citizenships:
                 if citizenship.country.lower() == "germany" and citizenship.is_active_on(person.date_of_birth):
                     reasons.append(f"Parent {parent.name} was a German citizen at birth.")
@@ -48,16 +32,12 @@ class GermanCitizenshipRule(BaseRule):
                     if person.date_of_birth < date(1975, 1, 1):
                         # Before 1975: citizenship only passed by father *if married to mother*
                         
-            #            if parent.gender == "male" and person.parents_married_at_birth():
-            #                 return RuleResult(True, ["Born before 1975 to married German father."])
-            #             else:
-            #                 return RuleResult(False, ["Born before 1975, but parents not married at birth."])
-            #         else:
-            #             return RuleResult(True, ["Born after 1975 to a German parent."])
-            
-
+      
+            # #         if citizenship.acquisition_method == "by_birth":
             #         if citizenship.acquisition_method in [AcquisitionMethod.BY_BIRTH, AcquisitionMethod.BY_DESCENT]:
             #             return RuleResult(True, ["Parent was German citizen by birth or descent at time of birth."])
+            #             # return RuleResult(True, ["Parent was German citizen by birth at child's birth."])
+
             #         elif citizenship.acquisition_method == AcquisitionMethod.BY_NATURALIZATION:
             #             if person.date_of_birth < date(1975, 1, 1):
             #                 return RuleResult(False, ["Before 1975, naturalized Germans could not always pass citizenship to children born abroad."])
@@ -68,19 +48,20 @@ class GermanCitizenshipRule(BaseRule):
             #         if citizenship.acquisition_method == "by_naturalization" and person.date_of_birth < date(1975, 1, 1):
             #             reasons.append("Parent was a naturalized citizen before 1975; transmission may be restricted.")
             #             continue
-            #         if citizenship.acquisition_method == "by_birth":
-            #             return RuleResult(True, [f"Parent was German citizen by birth at child's birth."])
+
+
             
-    
-                        if parent.gender == 'male':
-                            other_parent = next((p for p in person.parents if p != parent), None)
-                            if other_parent and parents_were_married_at_birth(person, parent, other_parent):
+            
+                        if parent.gender == "male":
+                            if person.parents_married_at_birth():
+                                # return RuleResult(True, ["Born before 1975 to married German father."])
                                 return RuleResult(True, reasons + ["Born before 1975: German father married to mother at birth → eligible and passes citizenship."])
                                 # return RuleResult(True, [f"Pre-1975: German father married at birth."])
                             else:
                                 reasons.append("Born before 1975: German father, but parents not married at birth.")
                                 # reasons.append("Pre-1975: German father, but parents not married at birth.")
                                 # reasons.append("Pre-1975: Mother cannot transmit citizenship if unmarried.")
+                                # return RuleResult(False, ["Born before 1975, but parents not married at birth."])
                                 continue
                         else:
                             reasons.append("Born before 1975: only father could pass citizenship; mother cannot.")
@@ -89,6 +70,7 @@ class GermanCitizenshipRule(BaseRule):
                     else:
                         return RuleResult(True, reasons + ["Born after 1975: either parent can transmit citizenship."])
                         # return RuleResult(True, ["Post-1975: Either parent can transmit citizenship."])
+                        # return RuleResult(True, ["Born after 1975 to a German parent."])
         
         # Check jus soli (born in Germany after 2000)
         if person.country_of_birth.lower() == "germany" and person.date_of_birth >= date(2000, 1, 1):

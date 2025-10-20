@@ -4,7 +4,7 @@ from models.citizenship import AcquisitionMethod
 from engine.citizenship_engine import CitizenshipEngine
 from rules.germany import GermanCitizenshipRule
 from rules.ireland import IrishCitizenshipRule
-from rules.uk import BritishCitizenshipRule
+from rules.united_kingdom import BritishCitizenshipRule
 from utils.report_utils import print_report
 from utils.date_utils import parse_date
 
@@ -159,23 +159,6 @@ from utils.date_utils import parse_date
 # This is a compact but extensible starting point. Add more country rules by
 # subclassing BaseRule and registering them with the engine.
 # """
-
-
-# import pkgutil, importlib, inspect
-# from engine.base_rule import BaseRule
-
-# def load_all_rules():
-#     rules = []
-#     for _, modname, _ in pkgutil.iter_modules(['rules']):
-#         module = importlib.import_module(f"rules.{modname}")
-#         for _, cls in inspect.getmembers(module, inspect.isclass):
-#             if issubclass(cls, BaseRule) and cls is not BaseRule:
-#                 rules.append(cls())
-#     return rules
-
-# for rule in load_all_rules():
-#     engine.register_rule(rule)
-
 
 
 

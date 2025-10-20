@@ -28,11 +28,32 @@ class CitizenshipEngine:
         """Dynamically import and register all rule classes from the given package."""
         package = importlib.import_module(rules_package)
         for _, module_name, _ in pkgutil.iter_modules(package.__path__):
+            if module_name.startswith("_"):
+                continue  # Skip templates or hidden modules
             module = importlib.import_module(f"{rules_package}.{module_name}")
             for _, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, BaseRule) and obj is not BaseRule:
                     instance = obj()
                     self.register_rule(instance)
+
+    # def _discover_rules(self):
+    #     from rules import __path__ as rules_path
+
+    #     for _, module_name, _ in pkgutil.iter_modules(rules_path):
+    #         if module_name.startswith("_"):
+    #             continue  # Skip templates or hidden modules
+
+    #         module = importlib.import_module(f"rules.{module_name}")
+
+    #         for attr_name in dir(module):
+    #             cls = getattr(module, attr_name)
+    #             if (
+    #                 isinstance(cls, type)
+    #                 and issubclass(cls, BaseRule)
+    #                 and cls is not BaseRule
+    #                 and not cls.__name__.startswith("Template")
+    #             ):
+    #                 self.register_rule(cls())
 
     def evaluate(self, person: Person) -> Dict[str, RuleResult]:
         """Run all registered rules against a given person."""
@@ -58,3 +79,17 @@ class CitizenshipEngine:
 
     def evaluate_all(self, people: List[Person]) -> Dict[str, Dict[str, RuleResult]]:
         return {p.name: self.evaluate(p) for p in people}
+
+
+
+    # def load_all_rules():
+    #     rules = []
+    #     for _, modname, _ in pkgutil.iter_modules(['rules']):
+    #         module = importlib.import_module(f"rules.{modname}")
+    #         for _, cls in inspect.getmembers(module, inspect.isclass):
+    #             if issubclass(cls, BaseRule) and cls is not BaseRule:
+    #                 rules.append(cls())
+    #     return rules
+
+    # for rule in load_all_rules():
+    #     engine.register_rule(rule)

@@ -26,3 +26,29 @@ class MarriageRecord:
         # if self.end_date and self.end_date < when:
         #     return False
         # return self.start_date <= when
+
+
+    # def married_at_time_of_birth(date_of_birth, parents_marriage_date):
+    #     if date_of_birth > parents_marriage_date:
+    #         return True
+    #     else:
+    #         return False
+
+    # def parents_were_married_at_birth(child: Person, parent1: Person, parent2: Person) -> bool:
+    #     for marriage in parent1.marriages:
+    #         if marriage.partner == parent2 and marriage.is_active_on(child.date_of_birth):
+    #             return True
+    #     for marriage in parent2.marriages:
+    #         if marriage.partner == parent1 and marriage.is_active_on(child.date_of_birth):
+    #             return True
+    #     return False
+    
+    
+    # def parents_were_married_at_birth(child: Person, parent1: Person, parent2: Person) -> bool:
+    #     for marriage in parent1.marriages:
+    #         if marriage.spouse == parent2 and marriage.is_active_on(child.date_of_birth):
+    #             return True
+    #     for marriage in parent2.marriages:
+    #         if marriage.spouse == parent1 and marriage.is_active_on(child.date_of_birth):
+    #             return True
+    #     return False
