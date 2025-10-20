@@ -3,14 +3,17 @@ from typing import List
 from engine.base_rule import BaseRule
 from models.person import Person
 from models.results import RuleResult
-from models.person import Marriage
 
 class DutchCitizenshipRule(BaseRule):
     country = "Netherlands"
 
-    def check(self, person: Person) -> bool:
+    def check(self, person: Person) -> RuleResult:
         # Example simplified logic:
+        reasons = []
         for parent in person.parents:
-            if parent.country_of_birth == "Netherlands":
-                return True
-        return False
+            if "netherlands" in [c.country.lower() for c in parent.citizenships] or parent.country_of_birth.lower() == "netherlands":
+                reasons.append(f"Parent {parent.name} has Italian citizenship or was born in Italy.")
+                # a more complex implementation would verify unbroken lineage and date constraints
+                return RuleResult(True, reasons)
+        reasons.append("No qualifying Dutch ancestor found in immediate parents (simplified check).")
+        return RuleResult(False, reasons)

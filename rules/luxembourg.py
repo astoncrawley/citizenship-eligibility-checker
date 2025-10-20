@@ -6,12 +6,12 @@ from models.citizenship import AcquisitionMethod
 from models.person import Person
 from models.results import RuleResult
 
-class FrenchCitizenshipRule(BaseRule):
-    country = "France"
+class LuxembourgishCitizenshipRule(BaseRule):
+    country = "Luxembourg"
 
     def check(self, person: Person) -> RuleResult:
         # simple example
         for parent in person.parents:
-            if "france" in [c.country.lower() for c in parent.citizenships]:
-                return RuleResult(True, ["Has a French parent"])
-        return RuleResult(False, ["No French parents"])
+            if "luxembourg" in [c.country.lower() for c in parent.citizenships]:
+                return RuleResult(True, ["Has an Luxembourgish parent"])
+        return RuleResult(False, ["No Luxembourgish parents"])

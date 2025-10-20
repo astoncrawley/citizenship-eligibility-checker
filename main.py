@@ -1,85 +1,12 @@
-import datetime
 from datetime import date
-
 from models.person import Person
 from models.citizenship import AcquisitionMethod
 from engine.citizenship_engine import CitizenshipEngine
 from rules.germany import GermanCitizenshipRule
 from rules.ireland import IrishCitizenshipRule
-
-# Utility: build date from ISO string
-def parse_date(s: str) -> date:
-    return datetime.fromisoformat(s).date()
-
-def print_report(name, results):
-    print(f"\nEligibility Report for {name}:")
-    for country, result in results.items():
-        print(f" - {country}: {'Eligible' if result.eligible else 'Not eligible'}")
-        for reason in result.reasons:
-            print(f"    - {reason}")
-
-# # Small pretty-print report
-# def print_report(name: str, results: Dict[str, RuleResult]) -> None:
-#     print(f"\n---- Eligibility report for: {name} ----")
-#     for country, rr in results.items():
-#         status = "ELIGIBLE" if rr.eligible else "NOT ELIGIBLE"
-#         print(f"* {country}: {status}")
-#         for r in rr.reasons:
-#             print(f"    - {r}")
-
-# def print_report(name: str, results: Dict[str, RuleResult]) -> None:
-#     print(f"\n--- Citizenship eligibility report for {name} ---")
-#     for country, rr in results.items():
-#         print(f"{country}: {'ELIGIBLE' if rr.eligible else 'NOT ELIGIBLE'}")
-#         for reason in rr.reasons:
-#             print(f"  - {reason}")
-
-
-# if __name__ == "__main__":
-#     # Example data
-#     father = Person("Hans", date(1950, 5, 5), "Germany", gender="male", citizenships=["Germany"])
-#     mother = Person("Jane", date(1955, 5, 5), "UK", gender="female", citizenships=["United Kingdom"])
-#     father.add_marriage(mother, start_date=date(1968, 1, 1))
-
-#     child = Person("Anna", date(1970, 1, 1), "France", parents=[father, mother])
-
-#     # Create engine and automatically load all rules from /rules/
-#     engine = CitizenshipEngine()
-#     engine.auto_discover_rules()
-
-#     # Evaluate eligibility
-#     results = engine.evaluate(child)
-
-#     print(f"\nCitizenship Eligibility Report for {child.name}:")
-#     for country, result in results.items():
-#         print(f" - {country}: {'Eligible' if result.eligible else 'Not eligible'}")
-#         for reason in result.reasons:
-#             print(f"    - {reason}")
-
-
-    # father = Person(name="Hans", date_of_birth=date(1950, 6, 1), gender="male", country_of_birth="Germany")
-    # father.add_citizenship("Germany", "by_birth", date(1950, 6, 1))
-    # father.add_citizenship("Canada", "by_naturalization", date(1980, 1, 1))
-
-    # child = Person(name="Anna", date_of_birth=date(1985, 5, 1), parents=[father])
-
-
-
-# if __name__ == "__main__":
-#     father = Person("Hans Müller", date(1950, 6, 1), "Germany", gender="male", citizenships=["Germany"])
-#     mother = Person("Jane Smith", date(1955, 8, 10), "USA", gender="female", citizenships=["United States"])
-#     father.add_marriage(mother, date(1968, 1, 1))
-
-#     child = Person("Anna Müller", date(1970, 3, 20), "France", parents=[father, mother])
-
-#     engine = CitizenshipEngine()
-#     engine.register_rule(GermanCitizenshipRule())
-#     engine.register_rule(IrishCitizenshipRule())
-
-#     results = engine.evaluate(child)
-#     print_report(child.name, results)
-
-
+from rules.uk import BritishCitizenshipRule
+from utils.report_utils import print_report
+from utils.date_utils import parse_date
 
 # # Demo/Example data and run
 # if __name__ == "__main__":
@@ -134,61 +61,41 @@ def print_report(name, results):
 #     print_report(alex.name, engine.evaluate(alex))
 
 
-    # father = Person(name="Hans", date_of_birth=date(1950, 5, 5), country_of_birth="Germany", citizenships=["Germany"], gender="male")
-    # mother = Person(name="Jane", date_of_birth=date(1955, 5, 5), country_of_birth="UK", citizenships=["United Kingdom"], gender="female")
 
-    # # Married in 1968, child born 1970
-    # father.add_marriage(mother, start_date=date(1968, 1, 1))
+# if __name__ == "__main__":
+#     father = Person(
+#         name="Hans",
+#         date_of_birth=date(1950, 5, 5),
+#         country_of_birth="Germany",
+#         gender="male"
+#     )
+#     # Add a citizenship using the Enum
+#     father.add_citizenship("Germany", AcquisitionMethod.BY_BIRTH, date(1950, 5, 5))
 
-    # child = Person(name="Anna", date_of_birth=date(1970, 1, 1), country_of_birth="France", parents=[father, mother])
+#     mother = Person(
+#         name="Jane",
+#         date_of_birth=date(1955, 5, 5),
+#         country_of_birth="UK",
+#         gender="female"
+#     )
+#     mother.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH, date(1955, 5, 5))
 
+#     child = Person(
+#         name="Anna",
+#         date_of_birth=date(1970, 1, 1),
+#         country_of_birth="France",
+#         parents=[father, mother]
+#     )
 
-if __name__ == "__main__":
-    father = Person(
-        name="Hans",
-        date_of_birth=date(1950, 5, 5),
-        country_of_birth="Germany",
-        gender="male"
-    )
-    # Add a citizenship using the Enum
-    father.add_citizenship("Germany", AcquisitionMethod.BY_BIRTH, date(1950, 5, 5))
+#     engine = CitizenshipEngine()
+#     engine.auto_discover_rules()
+#     results = engine.evaluate(child)
 
-    mother = Person(
-        name="Jane",
-        date_of_birth=date(1955, 5, 5),
-        country_of_birth="UK",
-        gender="female"
-    )
-    mother.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH, date(1955, 5, 5))
+#     for country, result in results.items():
+#         print(f"{country}: {'Eligible' if result.eligible else 'Not eligible'}")
+#         for reason in result.reasons:
+#             print(f"  - {reason}")
 
-    child = Person(
-        name="Anna",
-        date_of_birth=date(1970, 1, 1),
-        country_of_birth="France",
-        parents=[father, mother]
-    )
-
-    engine = CitizenshipEngine()
-    engine.auto_discover_rules()
-    results = engine.evaluate(child)
-
-    for country, result in results.items():
-        print(f"{country}: {'Eligible' if result.eligible else 'Not eligible'}")
-        for reason in result.reasons:
-            print(f"  - {reason}")
-
-
-    # father = Person("Hans", date(1950, 5, 5), "Germany", gender="male")
-    # father.add_citizenship("Germany", AcquisitionMethod.BY_BIRTH, date(1950, 5, 5))
-
-    # mother = Person("Jane", date(1955, 5, 5), "UK", gender="female")
-    # mother.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH)
-
-    # father.add_marriage(mother, start_date=date(1968, 1, 1))
-
-    # child = Person("Anna", date(1970, 1, 1), "France", parents=[father, mother])
-
-    # print(child.was_parents_married_at_birth())  # True ✅
 
 
 # if __name__ == "__main__":
@@ -240,26 +147,6 @@ if __name__ == "__main__":
 #     married_at_time_of_birth = False
 
 
-# if __name__ == "__main__":
-#     father = Person(name="Hans Müller", date_of_birth=date(1950, 6, 1), country_of_birth="Germany", citizenships=["Germany"], gender="male")
-#     mother = Person(name="Jane Smith", date_of_birth=date(1955, 8, 10), country_of_birth="USA", citizenships=["United States"], gender="female")
-#     child = Person(name="Anna Müller", date_of_birth=date(1970, 3, 20), country_of_birth="France", parents=[father, mother])
-
-#     child2 = Person(name="Ben Müller", date_of_birth=date(1980, 3, 20), country_of_birth="France", parents=[mother, father])
-
-#     child3 = Person(name="Lena Müller", date_of_birth=date(2005, 3, 20), country_of_birth="Germany", parents=[mother, father])
-
-#     engine = CitizenshipEngine()
-#     engine.register_rule(GermanCitizenshipRule())
-#     engine.register_rule(IrishCitizenshipRule())
-#     engine.register_rule(ItalianCitizenshipRule())
-
-#     for person in [child, child2, child3]:
-#         results = engine.evaluate(person)
-#         print_report(person.name, results)
-
-
-
 # """
 # Citizenship Engine Prototype
 # - Data model: Person (dataclass)
@@ -272,58 +159,6 @@ if __name__ == "__main__":
 # This is a compact but extensible starting point. Add more country rules by
 # subclassing BaseRule and registering them with the engine.
 # """
-# from __future__ import annotations
-# from dataclasses import dataclass, field
-# from datetime import date, datetime
-# from typing import List, Optional, Dict, Tuple, Any
-# from abc import ABC, abstractmethod
-# import json
-
-
-# # Example: load person data from a simple JSON structure
-# def person_from_dict(d: Dict[str, Any], persons_cache: Dict[str, Person] = None) -> Person:
-#     # persons_cache helps resolve references (parents/spouse) by name in the same payload
-#     if persons_cache is None:
-#         persons_cache = {}
-
-#     if d.get("name") in persons_cache:
-#         return persons_cache[d["name"]]
-
-#     p = Person(
-#         name=d.get("name"),
-#         date_of_birth=parse_date(d.get("date_of_birth")),
-#         country_of_birth=d.get("country_of_birth"),
-#         gender=d.get("gender"),
-#         citizenships=d.get("citizenships", []),
-#     )
-#     persons_cache[p.name] = p
-
-#     # Attach parents if provided as dicts
-#     parents = []
-#     for pd in d.get("parents", []):
-#         if isinstance(pd, dict):
-#             parents.append(person_from_dict(pd, persons_cache))
-#         elif isinstance(pd, str):
-#             # reference by name; will be resolved if present in cache
-#             if pd in persons_cache:
-#                 parents.append(persons_cache[pd])
-#             else:
-#                 # create placeholder with minimal info
-#                 placeholder = Person(name=pd, date_of_birth=parse_date("1900-01-01"), country_of_birth="")
-#                 persons_cache[pd] = placeholder
-#                 parents.append(placeholder)
-#     p.parents = parents
-
-#     # Spouse
-#     spouse = d.get("spouse")
-#     if spouse:
-#         if isinstance(spouse, dict):
-#             p.spouse = person_from_dict(spouse, persons_cache)
-#         elif isinstance(spouse, str):
-#             p.spouse = persons_cache.get(spouse)
-
-#     return p
-
 
 
 # import pkgutil, importlib, inspect
@@ -340,3 +175,119 @@ if __name__ == "__main__":
 
 # for rule in load_all_rules():
 #     engine.register_rule(rule)
+
+
+
+
+if __name__ == "__main__":
+    # Example data
+    father = Person(name="Hans Müller", date_of_birth=parse_date("1950-05-05"), country_of_birth="Germany", gender="male")
+    father.add_citizenship("Germany", AcquisitionMethod.BY_BIRTH)
+
+    mother = Person(name="Jane Smith", date_of_birth=parse_date("1955-05-05"), country_of_birth="UK", gender="female")
+    mother.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH)
+
+    father.add_marriage(mother, start_date=date(1968, 1, 1))
+
+    child = Person("Anna Müller", parse_date("1970-01-01"), "France", parents=[father, mother])
+
+    # Create engine and automatically load all rules from /rules/
+    engine = CitizenshipEngine()
+    engine.auto_discover_rules()
+    
+    # Evaluate eligibility
+    results = engine.evaluate(child)
+
+    print_report(child, results)
+    
+    
+
+
+    # father = Person(name="Hans Müller", date_of_birth=date(1950, 6, 1), country_of_birth="Germany", citizenships=["Germany"], gender="male")
+    # mother = Person(name="Jane Smith", date_of_birth=date(1955, 8, 10), country_of_birth="USA", citizenships=["United States"], gender="female")
+
+    # child = Person(name="Anna Müller", date_of_birth=date(1970, 3, 20), country_of_birth="France", parents=[father, mother])
+    # child2 = Person(name="Ben Müller", date_of_birth=date(1980, 3, 20), country_of_birth="France", parents=[mother, father])
+    # child3 = Person(name="Lena Müller", date_of_birth=date(2005, 3, 20), country_of_birth="Germany", parents=[mother, father])
+
+    # engine = CitizenshipEngine()
+    # engine.register_rule(GermanCitizenshipRule())
+    # engine.register_rule(IrishCitizenshipRule())
+
+    # for person in [child, child2, child3]:
+    #     results = engine.evaluate(person)
+    #     print_report(person.name, results)
+
+
+
+
+    # father = Person("Hans", date(1950, 5, 5), "Germany", gender="male", citizenships=["Germany"])
+    # mother = Person("Jane", date(1955, 5, 5), "UK", gender="female", citizenships=["United Kingdom"])
+    # father.add_marriage(mother, start_date=date(1968, 1, 1))
+
+    # child = Person("Anna", date(1970, 1, 1), "France", parents=[father, mother])
+
+
+
+
+
+    # father = Person(name="Hans", date_of_birth=date(1950, 6, 1), gender="male", country_of_birth="Germany")
+    # father.add_citizenship("Germany", "by_birth", date(1950, 6, 1))
+    # father.add_citizenship("Canada", "by_naturalization", date(1980, 1, 1))
+
+    # child = Person(name="Anna", date_of_birth=date(1985, 5, 1), parents=[father])
+
+
+
+
+    # father = Person("Hans Müller", date(1950, 6, 1), "Germany", gender="male", citizenships=["Germany"])
+    # mother = Person("Jane Smith", date(1955, 8, 10), "USA", gender="female", citizenships=["United States"])
+    # father.add_marriage(mother, date(1968, 1, 1))
+
+    # child = Person("Anna Müller", date(1970, 3, 20), "France", parents=[father, mother])
+
+    # engine = CitizenshipEngine()
+    # engine.register_rule(GermanCitizenshipRule())
+    # engine.register_rule(IrishCitizenshipRule())
+
+
+
+
+    # father = Person(name="Hans", date_of_birth=date(1950, 5, 5), country_of_birth="Germany", citizenships=["Germany"], gender="male")
+    # mother = Person(name="Jane", date_of_birth=date(1955, 5, 5), country_of_birth="UK", citizenships=["United Kingdom"], gender="female")
+
+    # # Married in 1968, child born 1970
+    # father.add_marriage(mother, start_date=date(1968, 1, 1))
+
+    # child = Person(name="Anna", date_of_birth=date(1970, 1, 1), country_of_birth="France", parents=[father, mother])
+
+
+
+
+    # father = Person("Hans", date(1950, 5, 5), "Germany", gender="male")
+    # father.add_citizenship("Germany", AcquisitionMethod.BY_BIRTH, date(1950, 5, 5))
+
+    # mother = Person("Jane", date(1955, 5, 5), "UK", gender="female")
+    # mother.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH)
+
+    # father.add_marriage(mother, start_date=date(1968, 1, 1))
+
+    # child = Person("Anna", date(1970, 1, 1), "France", parents=[father, mother])
+
+    # print(child.was_parents_married_at_birth())  # True ✅
+
+
+
+
+    # # Parent British by birth
+    # parent = Person("John", date(1970, 5, 5), "United Kingdom")
+    # parent.add_citizenship("United Kingdom", AcquisitionMethod.BY_BIRTH)
+
+    # # Child born abroad after 2000
+    # child = Person("Emma", date(2002, 3, 10), "France", parents=[parent])
+
+    # rule = BritishCitizenshipRule()
+    # result = rule.evaluate(child)
+
+    # print(result.country, result.eligible)
+    # print(result.reasons)

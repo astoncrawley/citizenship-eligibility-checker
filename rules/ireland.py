@@ -1,6 +1,8 @@
 from datetime import date
 from typing import List
+
 from engine.base_rule import BaseRule
+from models.citizenship import AcquisitionMethod
 from models.person import Person
 from models.results import RuleResult
 

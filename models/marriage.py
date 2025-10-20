@@ -1,13 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from models.person import Person
+if TYPE_CHECKING:
+    from models.person import Person
 
 @dataclass
 class MarriageRecord:
-    spouse: Person
+    spouse: Person #'Person'
     start_date: date
     end_date: Optional[date] = None
     country: Optional[str] = None
@@ -20,3 +21,8 @@ class MarriageRecord:
         if self.end_date and self.end_date <= when:
             return False
         return True
+
+        # """Check if marriage was active at a given date."""
+        # if self.end_date and self.end_date < when:
+        #     return False
+        # return self.start_date <= when

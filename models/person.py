@@ -7,19 +7,6 @@ from models.citizenship import CitizenshipRecord, AcquisitionMethod
 from models.marriage import MarriageRecord
 
 @dataclass
-class Marriage:
-    partner: 'Person'
-    start_date: date
-    end_date: Optional[date] = None
-
-    def is_active_on(self, when: date) -> bool:
-        """Check if marriage was active at a given date."""
-        if self.end_date and self.end_date < when:
-            return False
-        return self.start_date <= when
-
-
-@dataclass
 class Person:
     name: str
     date_of_birth: date
