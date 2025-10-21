@@ -46,6 +46,11 @@ class TemplateCitizenshipRule(BaseRule):
             else:
                 reasons.append("Born in Exampleland after 2000 — further checks required.")
 
+        # # Check jus soli (born in New Zealand before January 1st 2006)
+        # if person.country_of_birth.lower() == "new zealand" and person.date_of_birth < date(2006, 1, 1):
+        #     reasons.append("Born in New Zealand before 2006 - automatically New Zealand citizen.")
+        #     return RuleResult(True, reasons)
+
         # --- Example 2: Parent is a citizen by birth ---
         for parent in person.parents:
             for record in parent.citizenships:

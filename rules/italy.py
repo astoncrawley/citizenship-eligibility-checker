@@ -13,10 +13,18 @@ class ItalianCitizenshipRule(BaseRule):
         # Very simplified: if any parent has Italian citizenship, mark eligible.
         # Real rules are more complex (dates, interrupted lines, 1948 rule for maternal descent, etc.)
         reasons: List[str] = []
+        
         for parent in person.parents:
             if "italy" in [c.country.lower() for c in parent.citizenships] or parent.country_of_birth.lower() == "italy":
                 reasons.append(f"Parent {parent.name} has Italian citizenship or was born in Italy.")
                 # a more complex implementation would verify unbroken lineage and date constraints
                 return RuleResult(True, reasons)
-        reasons.append("No qualifying Italian ancestor found in immediate parents (simplified check).")
+        
+        # Default not eligible
+        if not reasons:
+            reasons.append("No Italian citizen parent or qualifying birth conditions met.")
+            # reasons.append("No qualifying Italian parent found.")
+            # reasons.append("No qualifying Italian citizenship found in parents.")
+            # reasons.append("No Italian parents")
+            # reasons.append("No qualifying Italian ancestor found in immediate parents (simplified check).")
         return RuleResult(False, reasons)

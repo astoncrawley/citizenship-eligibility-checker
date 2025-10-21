@@ -78,4 +78,11 @@ class BritishCitizenshipRule(BaseRule):
                         reasons.append("Eligible for registration as a British citizen (child under 18 with British parent).")
                         break
 
+        # Default not eligible
+        if not reasons:
+            reasons.append("No British citizen parent or qualifying birth conditions met.")
+            # reasons.append("No qualifying British parent found.")
+            # reasons.append("No qualifying British citizenship found in parents.")
+            # reasons.append("No British parents")
+            return RuleResult(False, reasons)
         return RuleResult(eligible, reasons)

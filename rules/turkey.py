@@ -10,8 +10,16 @@ class TurkishCitizenshipRule(BaseRule):
     country = "Turkey"
 
     def check(self, person: Person) -> RuleResult:
-        # simple example
+        reasons: List[str] = []
+        
         for parent in person.parents:
             if "turkey" in [c.country.lower() for c in parent.citizenships]:
                 return RuleResult(True, ["Has a Turkish parent"])
-        return RuleResult(False, ["No Turkish parents"])
+        
+        # Default not eligible
+        if not reasons:
+            reasons.append("No Turkish citizen parent or qualifying birth conditions met.")
+            # reasons.append("No qualifying Turkish parent found.")
+            # reasons.append("No qualifying Turkish citizenship found in parents.")
+            # reasons.append("No Turkish parents")
+        return RuleResult(False, reasons)

@@ -10,8 +10,16 @@ class GreekCitizenshipRule(BaseRule):
     country = "Greece"
 
     def check(self, person: Person) -> RuleResult:
-        # simple example
+        reasons: List[str] = []
+        
         for parent in person.parents:
             if "greece" in [c.country.lower() for c in parent.citizenships]:
                 return RuleResult(True, ["Has an Greek parent"])
-        return RuleResult(False, ["No Greek parents"])
+        
+        # Default not eligible
+        if not reasons:
+            reasons.append("No Greek citizen parent or qualifying birth conditions met.")
+            # reasons.append("No qualifying Greek parent found.")
+            # return RuleResult(False, ["No qualifying Greek citizenship found in parents."])
+            # return RuleResult(False, ["No qualifying Greek parent found."])
+        return RuleResult(False, reasons)
