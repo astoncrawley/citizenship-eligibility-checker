@@ -1,21 +1,21 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
 from datetime import date
 from typing import List, Optional
+from pydantic import BaseModel, Field
 
 from models.citizenship import CitizenshipRecord, AcquisitionMethod
 from models.marriage import MarriageRecord
 
-@dataclass
-class Person:
+class Person(BaseModel):
     name: str
     date_of_birth: date
     country_of_birth: str
     gender: Optional[str] = None
-    parents: List['Person'] = field(default_factory=list)
+    
+    parents: List['Person'] = Field(default_factory=list)
     # spouse: Optional['Person'] = None
-    citizenships: List[CitizenshipRecord] = field(default_factory=list)
-    marriages: List[MarriageRecord] = field(default_factory=list)
+    citizenships: List[CitizenshipRecord] = Field(default_factory=list)
+    marriages: List[MarriageRecord] = Field(default_factory=list)
 
     def add_parent(self, parent: 'Person') -> None:
         self.parents.append(parent)
@@ -68,3 +68,7 @@ class Person:
 
     def __repr__(self):
         return f"<Person: {self.name}, born {self.country_of_birth}>"
+
+
+# Fix forward references
+Person.model_rebuild()

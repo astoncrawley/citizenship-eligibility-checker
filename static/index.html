@@ -47,10 +47,15 @@
       <label>Date of Birth:</label>
       <input type="date" id="dob" name="dob" required />
 
+      <!-- <label>Country of Birth:</label><br>
+      <select id="birth_country"></select><br><br> -->
+
       <label>Country of Birth:</label>
       <select id="country_of_birth" name="country_of_birth" required>
         <option value="">Select Country</option>
         <option value="Germany">Germany</option>
+        <option value="Ireland">Ireland</option>
+        <option value="Netherlands">Netherlands</option>
         <option value="United Kingdom">United Kingdom</option>
         <option value="France">France</option>
         <option value="United States">United States</option>
@@ -77,13 +82,33 @@
     </div>
 
     <button type="submit">Check Eligibility</button>
+    <button type="button" id="download-json">Download JSON</button>
   </form>
 
   <div id="response">Response will appear here...</div>
 
   <script>
+    // // --- Country List (can later load from /data/countries.json) ---
+    // const countries = [
+    //   "Select Country", "United Kingdom", "Germany", "France", "Italy", "Spain", "Canada", "United States",
+    //   "Australia", "India", "China", "Japan", "South Africa", "Brazil", "Ireland"
+    // ];
+
+    // function populateCountryDropdown(selectElement) {
+    //   selectElement.innerHTML = "";
+    //   countries.forEach(country => {
+    //     const option = document.createElement("option");
+    //     option.value = country;
+    //     option.textContent = country;
+    //     selectElement.appendChild(option);
+    //   });
+    // }
+
     const parentsSection = document.getElementById("parents-section");
     const citizenshipsContainer = document.getElementById("citizenships-container");
+    // const responseBox = document.getElementById("response");
+
+    // populateCountryDropdown(document.getElementById("birth_country"));
 
     // Add parent input group
     document.getElementById("add-parent").addEventListener("click", () => {
@@ -101,6 +126,8 @@
         <select class="parent-country" required>
           <option value="">Select Country</option>
           <option value="Germany">Germany</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Netherlands">Netherlands</option>
           <option value="United Kingdom">United Kingdom</option>
           <option value="France">France</option>
           <option value="United States">United States</option>
@@ -127,6 +154,8 @@
           <select class="parent-cit-country" required>
             <option value="">Select Country</option>
             <option value="Germany">Germany</option>
+            <option value="Ireland">Ireland</option>
+            <option value="Netherlands">Netherlands</option>
             <option value="United Kingdom">United Kingdom</option>
             <option value="France">France</option>
             <option value="United States">United States</option>
@@ -157,6 +186,8 @@
         <select class="cit-country" required>
           <option value="">Select Country</option>
           <option value="Germany">Germany</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Netherlands">Netherlands</option>
           <option value="United Kingdom">United Kingdom</option>
           <option value="France">France</option>
           <option value="United States">United States</option>
@@ -226,6 +257,7 @@
         });
 
         // Send POST request
+        console.log("Payload sent to backend:", data);
         const res = await fetch("http://localhost:8000/citizenship/evaluate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -244,6 +276,65 @@
         responseBox.textContent = "Fetch error: " + error;
       }
     });
+
+    // Function to collect all data (shared between export and submit)
+    function collectFormData() {
+    const data = {
+        name: document.getElementById("name").value,
+        date_of_birth: document.getElementById("dob").value,
+        country_of_birth: document.getElementById("country_of_birth").value,
+        gender: document.getElementById("gender").value,
+        parents: [],
+        citizenships: []
+    };
+
+    // Collect parents
+    const parentBlocks = document.querySelectorAll("#parents-section .parent-block");
+    parentBlocks.forEach(parent => {
+        const parentData = {
+        name: parent.querySelector(".parent-name").value,
+        date_of_birth: parent.querySelector(".parent-dob").value,
+        country_of_birth: parent.querySelector(".parent-country").value,
+        gender: parent.querySelector(".parent-gender").value,
+        citizenships: []
+        };
+
+        parent.querySelectorAll(".parent-citizenships > div").forEach(citDiv => {
+        parentData.citizenships.push({
+            country: citDiv.querySelector(".parent-cit-country").value,
+            method: citDiv.querySelector(".parent-cit-method").value,
+            date: citDiv.querySelector(".parent-cit-date").value
+        });
+        });
+
+        data.parents.push(parentData);
+    });
+
+    // Collect applicant citizenships
+    const citizenshipsContainer = document.getElementById("citizenships-container");
+    citizenshipsContainer.querySelectorAll("div").forEach(div => {
+        data.citizenships.push({
+        country: div.querySelector(".cit-country").value,
+        method: div.querySelector(".cit-method").value,
+        date: div.querySelector(".cit-date").value
+        });
+    });
+
+    return data;
+    }
+
+    // Add export JSON button functionality
+    document.getElementById("download-json").addEventListener("click", () => {
+    const data = collectFormData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "citizenship_data.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    });
+
   </script>
 </body>
 </html>
