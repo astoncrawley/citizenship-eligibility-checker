@@ -1,340 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Citizenship Eligibility Checker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2em;
-      max-width: 800px;
-    }
-    input, select, button {
-      margin: 0.5em 0;
-      padding: 0.5em;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    button {
-      cursor: pointer;
-    }
-    .section {
-      border: 1px solid #ccc;
-      padding: 1em;
-      margin-bottom: 1em;
-      border-radius: 8px;
-    }
-    #response {
-      white-space: pre-wrap;
-      background: #f6f6f6;
-      padding: 1em;
-      border-radius: 8px;
-      margin-top: 1em;
-      border: 1px solid #ddd;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Citizenship Checker (with Profiles)</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+  header { background:#0f4c81; color:white; padding:12px 16px; display:flex; align-items:center; gap:12px; }
+  header input, header button { padding:6px 8px; border-radius:4px; border: none; }
+  header input { width:180px; }
+  main { padding: 16px; max-width: 1100px; margin:auto; }
+  fieldset { border:1px solid #ddd; padding:12px; margin-bottom:12px; border-radius:8px; }
+  label { display:block; margin-top:6px; }
+  input, select { padding:8px; width: 100%; box-sizing: border-box; margin-top:4px; }
+  button { padding:8px 12px; margin-top:8px; }
+  .row { display:flex; gap:12px; }
+  .half { flex:1; }
+  pre { background:#f6f6f6; padding:12px; border-radius:8px; white-space:pre-wrap; }
+  .small { font-size:0.9rem; color:#333; }
+</style>
 </head>
 <body>
-  <h1>Citizenship Eligibility Checker</h1>
+<header>
+  <strong>Citizenship Checker</strong>
+  <div style="flex:1"></div>
 
-  <form id="eligibility-form">
-    <div class="section">
-      <h2>Applicant Details</h2>
-      <label>Full Name:</label>
-      <input type="text" id="name" name="name" required />
+  <input id="email" placeholder="Email" />
+  <input id="password" placeholder="Password" type="password" />
+  <button id="btn-register">Register</button>
+  <button id="btn-login">Login</button>
+  <button id="btn-logout" style="display:none">Logout</button>
 
-      <label>Date of Birth:</label>
-      <input type="date" id="dob" name="dob" required />
+  <button id="btn-save" style="margin-left:12px">Save Profile</button>
+  <button id="btn-load">Load Profile</button>
+  <div id="auth-status" class="small" style="margin-left:12px"></div>
+</header>
 
-      <!-- <label>Country of Birth:</label><br>
-      <select id="birth_country"></select><br><br> -->
+<main>
+  <form id="citizenship-form">
+    <fieldset>
+      <legend>Applicant Details</legend>
+      <label>Name</label><input id="name" required />
+      <label>Date of Birth</label><input id="dob" type="date" required />
+      <label>Country of Birth</label>
+      <select id="birth_country"></select>
+      <label>Gender</label>
+      <select id="gender"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+    </fieldset>
 
-      <label>Country of Birth:</label>
-      <select id="country_of_birth" name="country_of_birth" required>
-        <option value="">Select Country</option>
-        <option value="Germany">Germany</option>
-        <option value="Ireland">Ireland</option>
-        <option value="Netherlands">Netherlands</option>
-        <option value="United Kingdom">United Kingdom</option>
-        <option value="France">France</option>
-        <option value="United States">United States</option>
-      </select>
+    <fieldset id="parents-section">
+      <legend>Parents</legend>
+      <div id="parents-container"></div>
+      <button type="button" id="add-parent">+ Add Parent</button>
+    </fieldset>
 
-      <label>Gender:</label>
-      <select id="gender" name="gender" required>
-        <option value="">Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-
-    <div class="section" id="parents-section">
-      <h2>Parents</h2>
-      <button type="button" id="add-parent">Add Parent</button>
-    </div>
-
-    <div class="section">
-      <h2>Citizenships</h2>
-      <button type="button" id="add-citizenship">Add Citizenship</button>
+    <fieldset id="citizenships-section">
+      <legend>Applicant Citizenships</legend>
       <div id="citizenships-container"></div>
-    </div>
+      <button type="button" id="add-citizenship">+ Add Citizenship</button>
+    </fieldset>
 
-    <button type="submit">Check Eligibility</button>
-    <button type="button" id="download-json">Download JSON</button>
+    <button type="button" id="btn-check">Check Eligibility</button>
   </form>
 
-  <div id="response">Response will appear here...</div>
+  <h3>Response</h3>
+  <pre id="response">No response yet</pre>
+</main>
 
-  <script>
-    // // --- Country List (can later load from /data/countries.json) ---
-    // const countries = [
-    //   "Select Country", "United Kingdom", "Germany", "France", "Italy", "Spain", "Canada", "United States",
-    //   "Australia", "India", "China", "Japan", "South Africa", "Brazil", "Ireland"
-    // ];
+<script>
+const API_BASE = ""; // empty means same origin (host + port)
+const COUNTRIES = ["United Kingdom","Germany","France","Italy","Spain","Netherlands","Ireland","United States","Canada","Australia","India"];
 
-    // function populateCountryDropdown(selectElement) {
-    //   selectElement.innerHTML = "";
-    //   countries.forEach(country => {
-    //     const option = document.createElement("option");
-    //     option.value = country;
-    //     option.textContent = country;
-    //     selectElement.appendChild(option);
-    //   });
-    // }
+function populateCountry(select){
+  select.innerHTML = "<option value=''>Select</option>";
+  for(const c of COUNTRIES){ const o = document.createElement("option"); o.value=c; o.textContent=c; select.appendChild(o); }
+}
+populateCountry(document.getElementById("birth_country"));
 
-    const parentsSection = document.getElementById("parents-section");
-    const citizenshipsContainer = document.getElementById("citizenships-container");
-    // const responseBox = document.getElementById("response");
+/* --- Auth helpers --- */
+function getToken(){ return localStorage.getItem("jwt_token"); }
+function setToken(t){ localStorage.setItem("jwt_token", t); updateAuthUI(); }
+function clearToken(){ localStorage.removeItem("jwt_token"); updateAuthUI(); }
 
-    // populateCountryDropdown(document.getElementById("birth_country"));
+function updateAuthUI(){
+  const token = getToken();
+  document.getElementById("auth-status").textContent = token ? "Logged in" : "Not logged in";
+  document.getElementById("btn-login").style.display = token ? "none":"inline-block";
+  document.getElementById("btn-register").style.display = token ? "none":"inline-block";
+  document.getElementById("btn-logout").style.display = token ? "inline-block":"none";
+}
 
-    // Add parent input group
-    document.getElementById("add-parent").addEventListener("click", () => {
-      const parentDiv = document.createElement("div");
-      parentDiv.className = "section parent-block";
-      parentDiv.innerHTML = `
-        <h3>Parent</h3>
-        <label>Full Name:</label>
-        <input type="text" class="parent-name" required />
+/* --- UI actions (header) --- */
+document.getElementById("btn-register").addEventListener("click", async ()=>{
+  const email = document.getElementById("email").value, pw = document.getElementById("password").value;
+  if(!email||!pw){ alert("Enter email and password"); return; }
+  const res = await fetch(API_BASE + "/auth/register", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, password: pw})});
+  if(res.ok){ alert("Registered — please login"); } else { const j=await res.json(); alert("Err: "+JSON.stringify(j)); }
+});
 
-        <label>Date of Birth:</label>
-        <input type="date" class="parent-dob" required />
+document.getElementById("btn-login").addEventListener("click", async ()=>{
+  const email = document.getElementById("email").value, pw = document.getElementById("password").value;
+  if(!email||!pw){ alert("Enter email and password"); return; }
+  const res = await fetch(API_BASE + "/auth/login", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, password: pw})});
+  if(res.ok){ const j = await res.json(); setToken(j.access_token); alert("Login OK"); } else { const j=await res.json(); alert("Login error: "+JSON.stringify(j)); }
+});
 
-        <label>Country of Birth:</label>
-        <select class="parent-country" required>
-          <option value="">Select Country</option>
-          <option value="Germany">Germany</option>
-          <option value="Ireland">Ireland</option>
-          <option value="Netherlands">Netherlands</option>
-          <option value="United Kingdom">United Kingdom</option>
-          <option value="France">France</option>
-          <option value="United States">United States</option>
-        </select>
+document.getElementById("btn-logout").addEventListener("click", ()=>{ clearToken(); alert("Logged out"); });
 
-        <label>Gender:</label>
-        <select class="parent-gender" required>
-          <option value="">Select Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
+/* --- Dynamic parents & citizenships code (same pattern as before) --- */
+const parentsContainer = document.getElementById("parents-container");
+const citizenshipsContainer = document.getElementById("citizenships-container");
+const responseBox = document.getElementById("response");
 
-        <h4>Parent Citizenships</h4>
-        <button type="button" class="add-parent-citizenship">Add Citizenship</button>
-        <div class="parent-citizenships"></div>
-      `;
+document.getElementById("add-parent").addEventListener("click", ()=>{
+  const div = document.createElement("div"); div.className="parent-block";
+  div.innerHTML = `
+    <fieldset style="padding:8px;">
+      <legend>Parent</legend>
+      <label>Name</label><input class="parent-name" />
+      <label>Date of Birth</label><input class="parent-dob" type="date" />
+      <label>Country of Birth</label><select class="parent-country"></select>
+      <label>Gender</label><select class="parent-gender"><option value=''>Select</option><option value='male'>Male</option><option value='female'>Female</option><option value='other'>Other</option></select>
 
-      parentDiv.querySelector(".add-parent-citizenship").addEventListener("click", (e) => {
-        const container = parentDiv.querySelector(".parent-citizenships");
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <label>Country:</label>
-          <select class="parent-cit-country" required>
-            <option value="">Select Country</option>
-            <option value="Germany">Germany</option>
-            <option value="Ireland">Ireland</option>
-            <option value="Netherlands">Netherlands</option>
-            <option value="United Kingdom">United Kingdom</option>
-            <option value="France">France</option>
-            <option value="United States">United States</option>
-          </select>
+      <div class="parent-cits"></div>
+      <button type="button" class="add-parent-cit">+ Add Parent Citizenship</button>
+      <button type="button" class="remove-parent">Remove Parent</button>
+    </fieldset>`;
+  parentsContainer.appendChild(div);
+  populateCountry(div.querySelector(".parent-country"));
 
-          <label>Acquisition Method:</label>
-          <select class="parent-cit-method" required>
-            <option value="by_birth">By Birth</option>
-            <option value="by_descent">By Descent</option>
-            <option value="by_naturalization">By Naturalization</option>
-            <option value="by_marriage">By Marriage</option>
-          </select>
+  div.querySelector(".add-parent-cit").addEventListener("click", ()=>{
+    const cdiv = document.createElement("div");
+    cdiv.innerHTML = `
+      <label>Country</label><select class="parent-cit-country"></select>
+      <label>Method</label>
+      <select class="parent-cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
+      <label>Date</label><input type="date" class="parent-cit-date" />
+      <button type="button" class="remove">Remove</button>
+    `;
+    cdiv.querySelector(".remove").addEventListener("click", ()=> cdiv.remove());
+    populateCountry(cdiv.querySelector(".parent-cit-country"));
+    div.querySelector(".parent-cits").appendChild(cdiv);
+  });
 
-          <label>Acquisition Date:</label>
-          <input type="date" class="parent-cit-date" required />
-        `;
-        container.appendChild(div);
-      });
+  div.querySelector(".remove-parent").addEventListener("click", ()=> div.remove());
+});
 
-      parentsSection.appendChild(parentDiv);
-    });
+document.getElementById("add-citizenship").addEventListener("click", ()=>{
+  const div = document.createElement("div");
+  div.innerHTML = `
+    <label>Country</label><select class="cit-country"></select>
+    <label>Method</label><select class="cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
+    <label>Date</label><input type="date" class="cit-date" />
+    <button type="button" class="remove">Remove</button>
+  `;
+  div.querySelector(".remove").addEventListener("click", ()=> div.remove());
+  populateCountry(div.querySelector(".cit-country"));
+  citizenshipsContainer.appendChild(div);
+});
 
-    // Add citizenship input group for the applicant
-    document.getElementById("add-citizenship").addEventListener("click", () => {
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <label>Country:</label>
-        <select class="cit-country" required>
-          <option value="">Select Country</option>
-          <option value="Germany">Germany</option>
-          <option value="Ireland">Ireland</option>
-          <option value="Netherlands">Netherlands</option>
-          <option value="United Kingdom">United Kingdom</option>
-          <option value="France">France</option>
-          <option value="United States">United States</option>
-        </select>
+/* --- Collect form to JSON (PersonSchema like) --- */
+function collectForm(){
+  const data = {
+    name: document.getElementById("name").value,
+    date_of_birth: document.getElementById("dob").value,
+    country_of_birth: document.getElementById("birth_country").value,
+    gender: document.getElementById("gender").value,
+    parents: [],
+    citizenships: [],
+    marriages: []
+  };
 
-        <label>Acquisition Method:</label>
-        <select class="cit-method" required>
-          <option value="by_birth">By Birth</option>
-          <option value="by_descent">By Descent</option>
-          <option value="by_naturalization">By Naturalization</option>
-          <option value="by_marriage">By Marriage</option>
-        </select>
-
-        <label>Acquisition Date:</label>
-        <input type="date" class="cit-date" required />
-      `;
-      citizenshipsContainer.appendChild(div);
-    });
-
-    // Handle form submission
-    document.getElementById("eligibility-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      console.log("Submitting form...");
-      const responseBox = document.getElementById("response");
-      responseBox.textContent = "Processing...";
-
-      try {
-        // Gather applicant data
-        const data = {
-          name: document.getElementById("name").value,
-          date_of_birth: document.getElementById("dob").value,
-          country_of_birth: document.getElementById("country_of_birth").value,
-          gender: document.getElementById("gender").value,
-          parents: [],
-          citizenships: []
-        };
-
-        // Collect parents
-        const parentBlocks = document.querySelectorAll("#parents-section .parent-block");
-        parentBlocks.forEach(parent => {
-        const parentData = {
-            name: parent.querySelector(".parent-name").value,
-            date_of_birth: parent.querySelector(".parent-dob").value,
-            country_of_birth: parent.querySelector(".parent-country").value,
-            gender: parent.querySelector(".parent-gender").value,
-            citizenships: []
-        };
-
-        parent.querySelectorAll(".parent-citizenships > div").forEach(citDiv => {
-            parentData.citizenships.push({
-            country: citDiv.querySelector(".parent-cit-country").value,
-            method: citDiv.querySelector(".parent-cit-method").value,
-            date: citDiv.querySelector(".parent-cit-date").value
-            });
-        });
-
-        data.parents.push(parentData);
-        });
-
-        // Collect applicant citizenships
-        citizenshipsContainer.querySelectorAll("div").forEach(div => {
-          data.citizenships.push({
-            country: div.querySelector(".cit-country").value,
-            method: div.querySelector(".cit-method").value,
-            date: div.querySelector(".cit-date").value
-          });
-        });
-
-        // Send POST request
-        console.log("Payload sent to backend:", data);
-        const res = await fetch("http://localhost:8000/citizenship/evaluate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        const resultText = await res.text();
-        try {
-          const result = JSON.parse(resultText);
-          responseBox.textContent = JSON.stringify(result, null, 2);
-        } catch {
-          responseBox.textContent = "Non-JSON response: " + resultText;
-        }
-
-      } catch (error) {
-        responseBox.textContent = "Fetch error: " + error;
-      }
-    });
-
-    // Function to collect all data (shared between export and submit)
-    function collectFormData() {
-    const data = {
-        name: document.getElementById("name").value,
-        date_of_birth: document.getElementById("dob").value,
-        country_of_birth: document.getElementById("country_of_birth").value,
-        gender: document.getElementById("gender").value,
-        parents: [],
-        citizenships: []
+  document.querySelectorAll(".parent-block").forEach(pb => {
+    const parent = {
+      name: pb.querySelector(".parent-name").value,
+      date_of_birth: pb.querySelector(".parent-dob").value,
+      country_of_birth: pb.querySelector(".parent-country").value,
+      gender: pb.querySelector(".parent-gender").value,
+      citizenships: [],
+      marriages: []
     };
-
-    // Collect parents
-    const parentBlocks = document.querySelectorAll("#parents-section .parent-block");
-    parentBlocks.forEach(parent => {
-        const parentData = {
-        name: parent.querySelector(".parent-name").value,
-        date_of_birth: parent.querySelector(".parent-dob").value,
-        country_of_birth: parent.querySelector(".parent-country").value,
-        gender: parent.querySelector(".parent-gender").value,
-        citizenships: []
-        };
-
-        parent.querySelectorAll(".parent-citizenships > div").forEach(citDiv => {
-        parentData.citizenships.push({
-            country: citDiv.querySelector(".parent-cit-country").value,
-            method: citDiv.querySelector(".parent-cit-method").value,
-            date: citDiv.querySelector(".parent-cit-date").value
-        });
-        });
-
-        data.parents.push(parentData);
+    pb.querySelectorAll(".parent-cits > div").forEach(citDiv => {
+      parent.citizenships.push({
+        country: citDiv.querySelector(".parent-cit-country").value,
+        method: citDiv.querySelector(".parent-cit-method").value,
+        date_acquired: citDiv.querySelector(".parent-cit-date").value
+      });
     });
+    data.parents.push(parent);
+  });
 
-    // Collect applicant citizenships
-    const citizenshipsContainer = document.getElementById("citizenships-container");
-    citizenshipsContainer.querySelectorAll("div").forEach(div => {
-        data.citizenships.push({
-        country: div.querySelector(".cit-country").value,
-        method: div.querySelector(".cit-method").value,
-        date: div.querySelector(".cit-date").value
-        });
+  document.querySelectorAll("#citizenships-container > div").forEach(div=>{
+    data.citizenships.push({
+      country: div.querySelector(".cit-country").value,
+      method: div.querySelector(".cit-method").value,
+      date_acquired: div.querySelector(".cit-date").value
     });
+  });
 
-    return data;
-    }
+  return data;
+}
 
-    // Add export JSON button functionality
-    document.getElementById("download-json").addEventListener("click", () => {
-    const data = collectFormData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "citizenship_data.json";
-    a.click();
-    URL.revokeObjectURL(url);
+/* --- Fill form from profile JSON --- */
+function fillForm(profile){
+  if(!profile) return;
+  document.getElementById("name").value = profile.name || "";
+  document.getElementById("dob").value = profile.date_of_birth || "";
+  document.getElementById("birth_country").value = profile.country_of_birth || "";
+  document.getElementById("gender").value = profile.gender || "";
+
+  // clear existing parents & citizenships
+  parentsContainer.innerHTML = "";
+  citizenshipsContainer.innerHTML = "";
+
+  (profile.parents || []).forEach(par => {
+    document.getElementById("add-parent").click();
+    const pb = parentsContainer.lastElementChild;
+    pb.querySelector(".parent-name").value = par.name || "";
+    pb.querySelector(".parent-dob").value = par.date_of_birth || "";
+    pb.querySelector(".parent-country").value = par.country_of_birth || "";
+    pb.querySelector(".parent-gender").value = par.gender || "";
+    (par.citizenships || []).forEach(cit => {
+      pb.querySelector(".add-parent-cit").click();
+      const last = pb.querySelector(".parent-cits").lastElementChild;
+      last.querySelector(".parent-cit-country").value = cit.country || "";
+      last.querySelector(".parent-cit-method").value = cit.method || "";
+      last.querySelector(".parent-cit-date").value = cit.date_acquired || cit.date || "";
     });
+  });
 
-  </script>
+  (profile.citizenships || []).forEach(cit => {
+    document.getElementById("add-citizenship").click();
+    const last = citizenshipsContainer.lastElementChild;
+    last.querySelector(".cit-country").value = cit.country || "";
+    last.querySelector(".cit-method").value = cit.method || "";
+    last.querySelector(".cit-date").value = cit.date_acquired || cit.date || "";
+  });
+}
+
+/* --- Save / Load profile (uses JWT) --- */
+async function saveProfile(){
+  const token = getToken();
+  if(!token){ alert("Please login first"); return; }
+  const data = collectForm();
+  const res = await fetch(API_BASE + "/api/profile", {
+    method: "POST",
+    headers: {"Content-Type":"application/json", "Authorization":"Bearer "+token},
+    body: JSON.stringify(data)
+  });
+  if(res.ok){ alert("Profile saved"); } else { const j = await res.json(); alert("Save error: "+JSON.stringify(j)); }
+}
+
+async function loadProfile(){
+  const token = getToken();
+  if(!token){ alert("Please login first"); return; }
+  const res = await fetch(API_BASE + "/api/profile", {method:"GET", headers:{"Authorization":"Bearer "+token}});
+  if(res.ok){ const j = await res.json(); fillForm(j.profile); responseBox.textContent = "Profile loaded"; }
+  else { const j = await res.json(); alert("Load error: "+JSON.stringify(j)); }
+}
+
+/* --- Hook header buttons --- */
+document.getElementById("btn-save").addEventListener("click", saveProfile);
+document.getElementById("btn-load").addEventListener("click", loadProfile);
+
+/* --- Eligibility check (sends payload to your /citizenship/evaluate if you still have that endpoint) --- */
+document.getElementById("btn-check").addEventListener("click", async ()=>{
+  const payload = collectForm();
+  responseBox.textContent = "Checking...";
+  try {
+    const res = await fetch(API_BASE + "/citizenship/evaluate", {
+      method:"POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload)
+    });
+    if(!res.ok){ responseBox.textContent = "Server error: "+res.status; return; }
+    const json = await res.json();
+    responseBox.textContent = JSON.stringify(json, null, 2);
+  } catch(err){ responseBox.textContent = "Fetch error: "+err; }
+});
+
+/* init */
+updateAuthUI();
+</script>
 </body>
 </html>

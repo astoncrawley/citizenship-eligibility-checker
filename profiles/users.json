@@ -1,0 +1,11 @@
+{
+  "alice": {
+    "password": "mypassword",
+    "profile": {
+      "name": "Alice Example",
+      "date_of_birth": "1950-01-01",
+      "country_of_birth": "United States",
+      "gender": "female"
+    }
+  }
+}

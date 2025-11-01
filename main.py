@@ -274,3 +274,50 @@ if __name__ == "__main__":
 
     # print(result.country, result.eligible)
     # print(result.reasons)
+
+
+
+
+# from fastapi import FastAPI, HTTPException
+# from auth import register_user, authenticate, save_profile, load_profile
+
+# app = FastAPI()
+
+# @app.post("/register")
+# def register(data: dict):
+#     if "username" not in data or "password" not in data:
+#         raise HTTPException(status_code=400, detail="username and password required")
+
+#     success = register_user(data["username"], data["password"])
+#     if not success:
+#         raise HTTPException(status_code=409, detail="User already exists")
+
+#     return {"message": "User registered successfully!"}
+
+
+# @app.post("/login")
+# def login(data: dict):
+#     if authenticate(data["username"], data["password"]):
+#         return {"message": "Login successful!"}
+#     raise HTTPException(status_code=401, detail="Invalid username or password")
+
+
+# @app.post("/profile/save")
+# def save_user_profile(data: dict):
+#     username = data.get("username")
+#     profile = data.get("profile")
+
+#     if not authenticate(username, data.get("password", "")):
+#         raise HTTPException(status_code=401, detail="Not authenticated")
+
+#     save_profile(username, profile)
+#     return {"message": "Profile saved"}
+
+
+# @app.get("/profile/{username}")
+# def get_user_profile(username: str, password: str):
+#     if not authenticate(username, password):
+#         raise HTTPException(status_code=401, detail="Not authenticated")
+
+#     profile = load_profile(username)
+#     return {"profile": profile}
