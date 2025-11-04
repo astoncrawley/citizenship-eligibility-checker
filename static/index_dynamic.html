@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Citizenship Eligibility</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0;
+            background: #f5f7fa;
+        }
+        header {
+            background: #1a73e8;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { font-size: 20px; margin: 0; }
+        .auth-buttons button {
+            margin-left: 10px;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            background: white;
+            color: #1a73e8;
+            border-radius: 4px;
+        }
+        .auth-section, .profile-section, .save-load-section {
+            background: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        input, select {
+            padding: 6px; margin: 6px 0; width: 100%;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+        button.primary {
+            background: #1a73e8; color: white;
+            padding: 8px 14px; border: none; border-radius: 4px;
+            cursor: pointer; margin-top: 8px;
+        }
+        button.secondary {
+            background: gray; color: white;
+            padding: 8px 14px; border: none; border-radius: 4px;
+            cursor: pointer; margin-top: 8px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Citizenship Checker</h1>
+    <div class="auth-buttons">
+        <span id="loggedInEmail" class="hidden"></span>
+        <button id="loginBtn">Login</button>
+        <button id="registerBtn">Register</button>
+        <button id="logoutBtn" class="hidden">Logout</button>
+    </div>
+</header>
+
+<!-- LOGIN FORM -->
+<div id="loginForm" class="auth-section">
+    <h2>Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button class="primary" onclick="login()">Login</button>
+</div>
+
+<!-- REGISTER FORM -->
+<div id="registerForm" class="auth-section">
+    <h2>Create an Account</h2>
+    <input id="registerEmail" type="email" placeholder="Email" />
+    <input id="registerPassword" type="password" placeholder="Password" />
+    <button class="primary" onclick="register()">Register</button>
+</div>
+
+<!-- PROFILE SAVE/LOAD -->
+<div id="profileSection" class="save-load-section">
+    <h2>Saved Profile</h2>
+    <pre id="savedProfileDisplay">No profile loaded.</pre>
+    <button class="primary" onclick="loadProfile()">Load Profile</button>
+    <button class="secondary" onclick="saveProfile()">Save Profile</button>
+</div>
+
+<!-- CITIZENSHIP FORM (your existing UI goes here) -->
+<div class="profile-section" id="citizenshipFormSection">
+    <h2>Citizenship Input Form</h2>
+    <!-- Replace with your full form fields -->
+    <label>Birth Country:</label>
+    <input id="birthCountry" type="text" />
+
+    <label>Years Lived in Country:</label>
+    <input id="yearsLived" type="number" />
+
+    <button class="primary" onclick="submitCitizenship()">Check Eligibility</button>
+</div>
+
+<script>
+    const API_BASE = "http://127.0.0.1:8000";
+    const tokenKey = "jwt_token";
+    const emailKey = "user_email";
+
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loggedInEmail = document.getElementById("loggedInEmail");
+
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const profileSection = document.getElementById("profileSection");
+    const citizenshipSection = document.getElementById("citizenshipFormSection");
+
+    function showLogin() {
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+    }
+
+    function showRegister() {
+        registerForm.style.display = "block";
+        loginForm.style.display = "none";
+    }
+
+    loginBtn.onclick = showLogin;
+    registerBtn.onclick = showRegister;
+
+    function updateUI() {
+        const token = localStorage.getItem(tokenKey);
+        const email = localStorage.getItem(emailKey);
+
+        if (token) {
+            loginBtn.classList.add("hidden");
+            registerBtn.classList.add("hidden");
+            logoutBtn.classList.remove("hidden");
+
+            loggedInEmail.textContent = email ? `Logged in as: ${email}` : "";
+            loggedInEmail.classList.remove("hidden");
+
+            loginForm.style.display = "none";
+            registerForm.style.display = "none";
+            profileSection.style.display = "block";
+            citizenshipSection.style.display = "block";
+        } else {
+            loginBtn.classList.remove("hidden");
+            registerBtn.classList.remove("hidden");
+            logoutBtn.classList.add("hidden");
+            loggedInEmail.classList.add("hidden");
+
+            profileSection.style.display = "none";
+            citizenshipSection.style.display = "none";
+        }
+    }
+
+    async function register() {
+        const email = document.getElementById("registerEmail").value;
+        const password = document.getElementById("registerPassword").value;
+
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        alert(await res.text());
+    }
+
+    async function login() {
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (data.token) {
+            localStorage.setItem(tokenKey, data.token);
+            localStorage.setItem(emailKey, email);
+            updateUI();
+        } else {
+            alert("Login failed");
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem(tokenKey);
+        localStorage.removeItem(emailKey);
+        updateUI();
+    }
+    logoutBtn.onclick = logout;
+
+    async function saveProfile() {
+        const token = localStorage.getItem(tokenKey);
+        const profileData = {
+            citizenship_data: {
+                birth_country: document.getElementById("birthCountry").value,
+                years_lived: document.getElementById("yearsLived").value
+            }
+        };
+
+        const res = await fetch(`${API_BASE}/api/profile`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(profileData)
+        });
+
+        alert(await res.text());
+    }
+
+    async function loadProfile() {
+        const token = localStorage.getItem(tokenKey);
+        const res = await fetch(`${API_BASE}/api/profile`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        document.getElementById("savedProfileDisplay").textContent =
+            JSON.stringify(data, null, 2);
+    }
+
+    function submitCitizenship() {
+        alert("This is where you'll call /evaluate");
+    }
+
+    updateUI();
+</script>
+</body>
+</html>

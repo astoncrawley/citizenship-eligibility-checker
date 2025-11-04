@@ -1,120 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Citizenship Checker (with Profiles)</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-  header { background:#0f4c81; color:white; padding:12px 16px; display:flex; align-items:center; gap:12px; }
-  header input, header button { padding:6px 8px; border-radius:4px; border: none; }
-  header input { width:180px; }
-  main { padding: 16px; max-width: 1100px; margin:auto; }
-  fieldset { border:1px solid #ddd; padding:12px; margin-bottom:12px; border-radius:8px; }
-  label { display:block; margin-top:6px; }
-  input, select { padding:8px; width: 100%; box-sizing: border-box; margin-top:4px; }
-  button { padding:8px 12px; margin-top:8px; }
-  .row { display:flex; gap:12px; }
-  .half { flex:1; }
-  pre { background:#f6f6f6; padding:12px; border-radius:8px; white-space:pre-wrap; }
-  .small { font-size:0.9rem; color:#333; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citizenship Eligibility Checker (with Profiles)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f4c81;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header input,
+    header button {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: none;
+    }
+    header input {
+      width: 180px;
+    }
+    main {
+      padding: 16px;
+      max-width: 1100px;
+      margin: auto;
+    }
+    fieldset {
+      border: 1px solid #ddd;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 6px;
+    }
+    input,
+    select {
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-top: 8px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .half {
+      flex: 1;
+    }
+    pre {
+      background: #f6f6f6;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+    .small {
+      font-size: 0.9rem;
+      /* color: #333; */
+      color: white;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <strong>Citizenship Checker</strong>
-  <div style="flex:1"></div>
+  <header>
+    <strong>Citizenship Checker</strong>
+    <div style="flex:1"></div>
 
-  <input id="email" placeholder="Email" />
-  <input id="password" placeholder="Password" type="password" />
-  <button id="btn-register">Register</button>
-  <button id="btn-login">Login</button>
-  <button id="btn-logout" style="display:none">Logout</button>
+    <input id="email" placeholder="Email" />
+    <input id="password" placeholder="Password" type="password" />
+    <button id="btn-register">Register</button>
+    <button id="btn-login">Login</button>
+    <button id="btn-logout" style="display:none">Logout</button>
 
-  <button id="btn-save" style="margin-left:12px">Save Profile</button>
-  <button id="btn-load">Load Profile</button>
-  <div id="auth-status" class="small" style="margin-left:12px"></div>
-</header>
+    <button id="btn-save" style="margin-left:12px">Save Profile</button>
+    <button id="btn-load">Load Profile</button>
+    <div id="auth-status" class="small" style="margin-left:12px"></div>
+  </header>
 
-<main>
-  <form id="citizenship-form">
-    <fieldset>
-      <legend>Applicant Details</legend>
-      <label>Name</label><input id="name" required />
-      <label>Date of Birth</label><input id="dob" type="date" required />
-      <label>Country of Birth</label>
-      <select id="birth_country"></select>
-      <label>Gender</label>
-      <select id="gender"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
-    </fieldset>
+  <main>
+    <form id="citizenship-form">
+      <fieldset>
+        <legend>Applicant Details</legend>
+        <label>Name</label><input id="name" required />
+        <label>Date of Birth</label><input id="dob" type="date" required />
+        <label>Country of Birth</label>
+        <select id="birth_country"></select>
+        <label>Gender</label>
+        <select id="gender">
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
 
-    <fieldset id="parents-section">
-      <legend>Parents</legend>
-      <div id="parents-container"></div>
-      <button type="button" id="add-parent">+ Add Parent</button>
-    </fieldset>
+        <label>Citizenships</label>
+          <div id="citizenships-container"></div>
+          <button type="button" id="add-citizenship">+ Add Citizenship</button>
+        
+        <label>Parents</label>
+            <div id="parents-container"></div>
+            <button type="button" id="add-parent">+ Add Parent</button>
 
-    <fieldset id="citizenships-section">
-      <legend>Applicant Citizenships</legend>
-      <div id="citizenships-container"></div>
-      <button type="button" id="add-citizenship">+ Add Citizenship</button>
-    </fieldset>
+      </fieldset>
 
-    <button type="button" id="btn-check">Check Eligibility</button>
-  </form>
+      <!-- <fieldset id="citizenships-section">
+        <legend>Applicant Citizenships</legend>
+        <div id="citizenships-container"></div>
+        <button type="button" id="add-citizenship">+ Add Citizenship</button>
+      </fieldset> -->
 
-  <h3>Response</h3>
-  <pre id="response">No response yet</pre>
-</main>
+      <!-- <fieldset id="parents-section">
+        <legend>Parents</legend>
+        <div id="parents-container"></div>
+        <button type="button" id="add-parent">+ Add Parent</button>
+      </fieldset> -->
 
-<script>
-const API_BASE = ""; // empty means same origin (host + port)
-const COUNTRIES = ["United Kingdom","Germany","France","Italy","Spain","Netherlands","Ireland","United States","Canada","Australia","India"];
+      <button type="button" id="btn-check">Check Eligibility</button>
+    </form>
 
-function populateCountry(select){
-  select.innerHTML = "<option value=''>Select</option>";
-  for(const c of COUNTRIES){ const o = document.createElement("option"); o.value=c; o.textContent=c; select.appendChild(o); }
-}
-populateCountry(document.getElementById("birth_country"));
+    <h3>Response</h3>
+    <pre id="response">No response yet</pre>
+  </main>
 
-/* --- Auth helpers --- */
-function getToken(){ return localStorage.getItem("jwt_token"); }
-function setToken(t){ localStorage.setItem("jwt_token", t); updateAuthUI(); }
-function clearToken(){ localStorage.removeItem("jwt_token"); updateAuthUI(); }
+  <script>
+    const statusEl = document.getElementById("status");
+    const API = "http://127.0.0.1:8000";
+    const tokenKey = "jwt_token";
+    const emailKey = "user_email";
 
-function updateAuthUI(){
-  const token = getToken();
-  document.getElementById("auth-status").textContent = token ? "Logged in" : "Not logged in";
-  document.getElementById("btn-login").style.display = token ? "none":"inline-block";
-  document.getElementById("btn-register").style.display = token ? "none":"inline-block";
-  document.getElementById("btn-logout").style.display = token ? "inline-block":"none";
-}
+    let token = localStorage.getItem("token") || null;
 
-/* --- UI actions (header) --- */
-document.getElementById("btn-register").addEventListener("click", async ()=>{
-  const email = document.getElementById("email").value, pw = document.getElementById("password").value;
-  if(!email||!pw){ alert("Enter email and password"); return; }
-  const res = await fetch(API_BASE + "/auth/register", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, password: pw})});
-  if(res.ok){ alert("Registered — please login"); } else { const j=await res.json(); alert("Err: "+JSON.stringify(j)); }
-});
+    function setStatus(msg) { statusEl.textContent = msg; }
 
-document.getElementById("btn-login").addEventListener("click", async ()=>{
-  const email = document.getElementById("email").value, pw = document.getElementById("password").value;
-  if(!email||!pw){ alert("Enter email and password"); return; }
-  const res = await fetch(API_BASE + "/auth/login", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, password: pw})});
-  if(res.ok){ const j = await res.json(); setToken(j.access_token); alert("Login OK"); } else { const j=await res.json(); alert("Login error: "+JSON.stringify(j)); }
-});
+    async function loadProfile() {
+      if (!token) return;
+      const res = await fetch(`${API}/api/profile`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.name) document.getElementById("name").value = data.name;
+      if (data.date_of_birth) document.getElementById("dob").value = data.date_of_birth;
+      if (data.birth_country) document.getElementById("birth_country").value = data.birth_country;
+      if (data.gender) document.getElementById("gender").value = data.gender;
+      setStatus("Loaded ✓");
+    }
 
-document.getElementById("btn-logout").addEventListener("click", ()=>{ clearToken(); alert("Logged out"); });
+    async function saveProfile() {
+      if (!token) return;
+      const payload = {
+        name: document.getElementById("name").value,
+        date_of_birth: document.getElementById("dob").value,
+        birth_country: document.getElementById("birth_country").value,
+        gender: document.getElementById("gender").value
+      };
+      setStatus("Saving...");
+      const res = await fetch(`${API}/api/profile`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) setStatus("Saved ✓");
+    }
 
-/* --- Dynamic parents & citizenships code (same pattern as before) --- */
-const parentsContainer = document.getElementById("parents-container");
-const citizenshipsContainer = document.getElementById("citizenships-container");
-const responseBox = document.getElementById("response");
+    // Auto-save on input
+    document.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", () => {
+        setStatus("Editing...");
+        saveProfile();
+      });
+    });
 
-document.getElementById("add-parent").addEventListener("click", ()=>{
-  const div = document.createElement("div"); div.className="parent-block";
-  div.innerHTML = `
+    loadProfile();
+
+
+    const API_BASE = ""; // empty means same origin (host + port)
+    const COUNTRIES = ["United Kingdom", "Germany", "France", "Italy", "Spain", "Netherlands", "Ireland", "United States", "Canada", "Australia", "India"];
+
+    function populateCountry(select) {
+      select.innerHTML = "<option value=''>Select</option>";
+      for (const c of COUNTRIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; select.appendChild(o); }
+    }
+    populateCountry(document.getElementById("birth_country"));
+
+    /* --- Auth helpers --- */
+    function getToken() { return localStorage.getItem("jwt_token"); }
+    function setToken(t) { localStorage.setItem("jwt_token", t); updateAuthUI(); }
+    function clearToken() { localStorage.removeItem("jwt_token"); updateAuthUI(); }
+
+    function updateAuthUI() {
+      const token = getToken();
+      const email = localStorage.getItem(emailKey);
+      document.getElementById("auth-status").textContent = token ? `Logged in as: ${email}` : "Not logged in";
+      document.getElementById("btn-login").style.display = token ? "none" : "inline-block";
+      document.getElementById("btn-register").style.display = token ? "none" : "inline-block";
+      document.getElementById("btn-logout").style.display = token ? "inline-block" : "none";
+    }
+
+    /* --- UI actions (header) --- */
+    document.getElementById("btn-register").addEventListener("click", async () => {
+      const email = document.getElementById("email").value, pw = document.getElementById("password").value;
+      if (!email || !pw) { alert("Enter email and password"); return; }
+      const res = await fetch(API_BASE + "/auth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password: pw }) });
+      if (res.ok) { alert("Registered — please login"); } else { const j = await res.json(); alert("Err: " + JSON.stringify(j)); }
+    });
+
+    document.getElementById("btn-login").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const pw = document.getElementById("password").value;
+      if (!email || !pw) { alert("Enter email and password"); return; }
+      const res = await fetch(API_BASE + "/auth/login", { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password: pw }) });
+      if (res.ok) { const j = await res.json(); 
+        localStorage.setItem(emailKey, email); setToken(j.access_token); alert("Login OK"); } else { const j = await res.json(); alert("Login error: " + JSON.stringify(j)); }
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", () => { clearToken(); alert("Logged out"); });
+
+    /* --- Dynamic parents & citizenships code (same pattern as before) --- */
+    const parentsContainer = document.getElementById("parents-container");
+    const citizenshipsContainer = document.getElementById("citizenships-container");
+    const responseBox = document.getElementById("response");
+
+    document.getElementById("add-parent").addEventListener("click", () => {
+      const div = document.createElement("div"); div.className = "parent-block";
+      div.innerHTML = `
     <fieldset style="padding:8px;">
       <legend>Parent</legend>
       <label>Name</label><input class="parent-name" />
@@ -126,159 +253,163 @@ document.getElementById("add-parent").addEventListener("click", ()=>{
       <button type="button" class="add-parent-cit">+ Add Parent Citizenship</button>
       <button type="button" class="remove-parent">Remove Parent</button>
     </fieldset>`;
-  parentsContainer.appendChild(div);
-  populateCountry(div.querySelector(".parent-country"));
+      parentsContainer.appendChild(div);
+      populateCountry(div.querySelector(".parent-country"));
 
-  div.querySelector(".add-parent-cit").addEventListener("click", ()=>{
-    const cdiv = document.createElement("div");
-    cdiv.innerHTML = `
-      <label>Country</label><select class="parent-cit-country"></select>
-      <label>Method</label>
-      <select class="parent-cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
-      <label>Date</label><input type="date" class="parent-cit-date" />
-      <button type="button" class="remove">Remove</button>
-    `;
-    cdiv.querySelector(".remove").addEventListener("click", ()=> cdiv.remove());
-    populateCountry(cdiv.querySelector(".parent-cit-country"));
-    div.querySelector(".parent-cits").appendChild(cdiv);
-  });
-
-  div.querySelector(".remove-parent").addEventListener("click", ()=> div.remove());
-});
-
-document.getElementById("add-citizenship").addEventListener("click", ()=>{
-  const div = document.createElement("div");
-  div.innerHTML = `
-    <label>Country</label><select class="cit-country"></select>
-    <label>Method</label><select class="cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
-    <label>Date</label><input type="date" class="cit-date" />
-    <button type="button" class="remove">Remove</button>
-  `;
-  div.querySelector(".remove").addEventListener("click", ()=> div.remove());
-  populateCountry(div.querySelector(".cit-country"));
-  citizenshipsContainer.appendChild(div);
-});
-
-/* --- Collect form to JSON (PersonSchema like) --- */
-function collectForm(){
-  const data = {
-    name: document.getElementById("name").value,
-    date_of_birth: document.getElementById("dob").value,
-    country_of_birth: document.getElementById("birth_country").value,
-    gender: document.getElementById("gender").value,
-    parents: [],
-    citizenships: [],
-    marriages: []
-  };
-
-  document.querySelectorAll(".parent-block").forEach(pb => {
-    const parent = {
-      name: pb.querySelector(".parent-name").value,
-      date_of_birth: pb.querySelector(".parent-dob").value,
-      country_of_birth: pb.querySelector(".parent-country").value,
-      gender: pb.querySelector(".parent-gender").value,
-      citizenships: [],
-      marriages: []
-    };
-    pb.querySelectorAll(".parent-cits > div").forEach(citDiv => {
-      parent.citizenships.push({
-        country: citDiv.querySelector(".parent-cit-country").value,
-        method: citDiv.querySelector(".parent-cit-method").value,
-        date_acquired: citDiv.querySelector(".parent-cit-date").value
+      div.querySelector(".add-parent-cit").addEventListener("click", () => {
+        const cdiv = document.createElement("div");
+        cdiv.innerHTML = `
+      <fieldset style="padding:8px;">
+        <legend>Citizenship</legend>
+        <label>Country</label><select class="parent-cit-country"></select>
+        <label>Method</label>
+        <select class="parent-cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
+        <label>Date</label><input type="date" class="parent-cit-date" />
+        <button type="button" class="remove">Remove</button>
+      </fieldset>`;
+        cdiv.querySelector(".remove").addEventListener("click", () => cdiv.remove());
+        populateCountry(cdiv.querySelector(".parent-cit-country"));
+        div.querySelector(".parent-cits").appendChild(cdiv);
       });
+
+      div.querySelector(".remove-parent").addEventListener("click", () => div.remove());
     });
-    data.parents.push(parent);
-  });
 
-  document.querySelectorAll("#citizenships-container > div").forEach(div=>{
-    data.citizenships.push({
-      country: div.querySelector(".cit-country").value,
-      method: div.querySelector(".cit-method").value,
-      date_acquired: div.querySelector(".cit-date").value
+    document.getElementById("add-citizenship").addEventListener("click", () => {
+      const div = document.createElement("div");
+      div.innerHTML = `
+    <fieldset style="padding:8px;">
+      <legend>Citizenship</legend>
+      <label>Country</label><select class="cit-country"></select>
+      <label>Method</label><select class="cit-method"><option value="by_birth">By Birth</option><option value="by_descent">By Descent</option><option value="by_naturalization">By Naturalization</option></select>
+      <label>Date</label><input type="date" class="cit-date" />
+      <button type="button" class="remove">Remove</button>
+    </fieldset>`;
+      div.querySelector(".remove").addEventListener("click", () => div.remove());
+      populateCountry(div.querySelector(".cit-country"));
+      citizenshipsContainer.appendChild(div);
     });
-  });
 
-  return data;
-}
+    /* --- Collect form to JSON (PersonSchema like) --- */
+    function collectForm() {
+      const data = {
+        name: document.getElementById("name").value,
+        date_of_birth: document.getElementById("dob").value,
+        country_of_birth: document.getElementById("birth_country").value,
+        gender: document.getElementById("gender").value,
+        parents: [],
+        citizenships: [],
+        marriages: []
+      };
 
-/* --- Fill form from profile JSON --- */
-function fillForm(profile){
-  if(!profile) return;
-  document.getElementById("name").value = profile.name || "";
-  document.getElementById("dob").value = profile.date_of_birth || "";
-  document.getElementById("birth_country").value = profile.country_of_birth || "";
-  document.getElementById("gender").value = profile.gender || "";
+      document.querySelectorAll(".parent-block").forEach(pb => {
+        const parent = {
+          name: pb.querySelector(".parent-name").value,
+          date_of_birth: pb.querySelector(".parent-dob").value,
+          country_of_birth: pb.querySelector(".parent-country").value,
+          gender: pb.querySelector(".parent-gender").value,
+          citizenships: [],
+          marriages: []
+        };
+        pb.querySelectorAll(".parent-cits > div").forEach(citDiv => {
+          parent.citizenships.push({
+            country: citDiv.querySelector(".parent-cit-country").value,
+            method: citDiv.querySelector(".parent-cit-method").value,
+            date_acquired: citDiv.querySelector(".parent-cit-date").value
+          });
+        });
+        data.parents.push(parent);
+      });
 
-  // clear existing parents & citizenships
-  parentsContainer.innerHTML = "";
-  citizenshipsContainer.innerHTML = "";
+      document.querySelectorAll("#citizenships-container > div").forEach(div => {
+        data.citizenships.push({
+          country: div.querySelector(".cit-country").value,
+          method: div.querySelector(".cit-method").value,
+          date_acquired: div.querySelector(".cit-date").value
+        });
+      });
 
-  (profile.parents || []).forEach(par => {
-    document.getElementById("add-parent").click();
-    const pb = parentsContainer.lastElementChild;
-    pb.querySelector(".parent-name").value = par.name || "";
-    pb.querySelector(".parent-dob").value = par.date_of_birth || "";
-    pb.querySelector(".parent-country").value = par.country_of_birth || "";
-    pb.querySelector(".parent-gender").value = par.gender || "";
-    (par.citizenships || []).forEach(cit => {
-      pb.querySelector(".add-parent-cit").click();
-      const last = pb.querySelector(".parent-cits").lastElementChild;
-      last.querySelector(".parent-cit-country").value = cit.country || "";
-      last.querySelector(".parent-cit-method").value = cit.method || "";
-      last.querySelector(".parent-cit-date").value = cit.date_acquired || cit.date || "";
+      return data;
+    }
+
+    /* --- Fill form from profile JSON --- */
+    function fillForm(profile) {
+      if (!profile) return;
+      document.getElementById("name").value = profile.name || "";
+      document.getElementById("dob").value = profile.date_of_birth || "";
+      document.getElementById("birth_country").value = profile.country_of_birth || "";
+      document.getElementById("gender").value = profile.gender || "";
+
+      // clear existing parents & citizenships
+      parentsContainer.innerHTML = "";
+      citizenshipsContainer.innerHTML = "";
+
+      (profile.parents || []).forEach(par => {
+        document.getElementById("add-parent").click();
+        const pb = parentsContainer.lastElementChild;
+        pb.querySelector(".parent-name").value = par.name || "";
+        pb.querySelector(".parent-dob").value = par.date_of_birth || "";
+        pb.querySelector(".parent-country").value = par.country_of_birth || "";
+        pb.querySelector(".parent-gender").value = par.gender || "";
+        (par.citizenships || []).forEach(cit => {
+          pb.querySelector(".add-parent-cit").click();
+          const last = pb.querySelector(".parent-cits").lastElementChild;
+          last.querySelector(".parent-cit-country").value = cit.country || "";
+          last.querySelector(".parent-cit-method").value = cit.method || "";
+          last.querySelector(".parent-cit-date").value = cit.date_acquired || cit.date || "";
+        });
+      });
+
+      (profile.citizenships || []).forEach(cit => {
+        document.getElementById("add-citizenship").click();
+        const last = citizenshipsContainer.lastElementChild;
+        last.querySelector(".cit-country").value = cit.country || "";
+        last.querySelector(".cit-method").value = cit.method || "";
+        last.querySelector(".cit-date").value = cit.date_acquired || cit.date || "";
+      });
+    }
+
+    /* --- Save / Load profile (uses JWT) --- */
+    async function saveProfile() {
+      const token = getToken();
+      if (!token) { alert("Please login first"); return; }
+      const data = collectForm();
+      const res = await fetch(API_BASE + "/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) { alert("Profile saved"); } else { const j = await res.json(); alert("Save error: " + JSON.stringify(j)); }
+    }
+
+    async function loadProfile() {
+      const token = getToken();
+      if (!token) { alert("Please login first"); return; }
+      const res = await fetch(API_BASE + "/api/profile", { method: "GET", headers: { "Authorization": "Bearer " + token } });
+      if (res.ok) { const j = await res.json(); fillForm(j.profile); responseBox.textContent = "Profile loaded"; }
+      else { const j = await res.json(); alert("Load error: " + JSON.stringify(j)); }
+    }
+
+    /* --- Hook header buttons --- */
+    document.getElementById("btn-save").addEventListener("click", saveProfile);
+    document.getElementById("btn-load").addEventListener("click", loadProfile);
+
+    /* --- Eligibility check (sends payload to your /citizenship/evaluate if you still have that endpoint) --- */
+    document.getElementById("btn-check").addEventListener("click", async () => {
+      const payload = collectForm();
+      responseBox.textContent = "Checking...";
+      try {
+        const res = await fetch(API_BASE + "/citizenship/evaluate", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) { responseBox.textContent = "Server error: " + res.status; return; }
+        const json = await res.json();
+        responseBox.textContent = JSON.stringify(json, null, 2);
+      } catch (err) { responseBox.textContent = "Fetch error: " + err; }
     });
-  });
 
-  (profile.citizenships || []).forEach(cit => {
-    document.getElementById("add-citizenship").click();
-    const last = citizenshipsContainer.lastElementChild;
-    last.querySelector(".cit-country").value = cit.country || "";
-    last.querySelector(".cit-method").value = cit.method || "";
-    last.querySelector(".cit-date").value = cit.date_acquired || cit.date || "";
-  });
-}
-
-/* --- Save / Load profile (uses JWT) --- */
-async function saveProfile(){
-  const token = getToken();
-  if(!token){ alert("Please login first"); return; }
-  const data = collectForm();
-  const res = await fetch(API_BASE + "/api/profile", {
-    method: "POST",
-    headers: {"Content-Type":"application/json", "Authorization":"Bearer "+token},
-    body: JSON.stringify(data)
-  });
-  if(res.ok){ alert("Profile saved"); } else { const j = await res.json(); alert("Save error: "+JSON.stringify(j)); }
-}
-
-async function loadProfile(){
-  const token = getToken();
-  if(!token){ alert("Please login first"); return; }
-  const res = await fetch(API_BASE + "/api/profile", {method:"GET", headers:{"Authorization":"Bearer "+token}});
-  if(res.ok){ const j = await res.json(); fillForm(j.profile); responseBox.textContent = "Profile loaded"; }
-  else { const j = await res.json(); alert("Load error: "+JSON.stringify(j)); }
-}
-
-/* --- Hook header buttons --- */
-document.getElementById("btn-save").addEventListener("click", saveProfile);
-document.getElementById("btn-load").addEventListener("click", loadProfile);
-
-/* --- Eligibility check (sends payload to your /citizenship/evaluate if you still have that endpoint) --- */
-document.getElementById("btn-check").addEventListener("click", async ()=>{
-  const payload = collectForm();
-  responseBox.textContent = "Checking...";
-  try {
-    const res = await fetch(API_BASE + "/citizenship/evaluate", {
-      method:"POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload)
-    });
-    if(!res.ok){ responseBox.textContent = "Server error: "+res.status; return; }
-    const json = await res.json();
-    responseBox.textContent = JSON.stringify(json, null, 2);
-  } catch(err){ responseBox.textContent = "Fetch error: "+err; }
-});
-
-/* init */
-updateAuthUI();
-</script>
+    /* init */
+    updateAuthUI();
+  </script>
 </body>
 </html>
