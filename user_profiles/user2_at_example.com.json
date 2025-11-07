@@ -1,0 +1,48 @@
+{
+  "name": "John Smith",
+  "date_of_birth": "1950-01-01",
+  "country_of_birth": "United States",
+  "gender": "male",
+  "parents": [
+    {
+      "name": "John Smith Sr.",
+      "date_of_birth": "1930-01-01",
+      "country_of_birth": "Ireland",
+      "gender": "male",
+      "citizenships": [
+        {
+          "country": "Netherlands",
+          "method": "by_birth",
+          "date_acquired": "1930-01-01"
+        },
+        {
+          "country": "Ireland",
+          "method": "by_descent",
+          "date_acquired": "1930-01-01"
+        }
+      ],
+      "marriages": []
+    },
+    {
+      "name": "Sally Smith",
+      "date_of_birth": "1930-01-01",
+      "country_of_birth": "France",
+      "gender": "female",
+      "citizenships": [
+        {
+          "country": "France",
+          "method": "by_birth",
+          "date_acquired": "1930-01-01"
+        },
+        {
+          "country": "Germany",
+          "method": "by_descent",
+          "date_acquired": "1930-01-01"
+        }
+      ],
+      "marriages": []
+    }
+  ],
+  "citizenships": [],
+  "marriages": []
+}

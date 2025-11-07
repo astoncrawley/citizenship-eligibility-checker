@@ -1,0 +1,14 @@
+{
+  "users": {
+    "user2@example.com": {
+      "email": "user2@example.com",
+      "password": "mypassword123",
+      "profile": {}
+    },
+    "user1@example.com": {
+      "email": "user1@example.com",
+      "password": "test1234",
+      "profile": {}
+    }
+  }
+}

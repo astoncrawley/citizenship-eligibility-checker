@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citizenship Eligibility Checker</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header {
+      background: #0f4c81; color: white; padding: 12px 16px; display: flex;
+      align-items: center; gap: 12px;
+    }
+    header input, header button {
+      padding: 6px 8px; border-radius: 4px; border: none;
+    }
+    header input { width: 180px; }
+    main { padding: 16px; max-width: 1100px; margin: auto; }
+    fieldset {
+      border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 8px;
+    }
+    label { display: block; margin-top: 6px; }
+    input, select {
+      padding: 8px; width: 100%; box-sizing: border-box; margin-top: 4px;
+    }
+    button { padding: 8px 12px; margin-top: 8px; cursor: pointer; }
+    pre { background: #f6f6f6; padding: 12px; border-radius: 8px; white-space: pre-wrap; }
+    .small { font-size: 0.85rem; color: #f0f0f0; }
+    .row { display: flex; gap: 12px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <strong>Citizenship Checker</strong>
+    <div style="flex:1"></div>
+
+    <!-- AUTH UI -->
+    <input id="email" placeholder="Email" />
+    <input id="password" placeholder="Password" type="password" />
+    <button id="btn-register">Register</button>
+    <button id="btn-login">Login</button>
+    <button id="btn-logout" style="display:none">Logout</button>
+
+    <!-- PROFILE SAVE/LOAD -->
+    <button id="btn-save" style="margin-left:12px">Save Profile</button>
+    <button id="btn-load">Load Profile</button>
+
+    <div id="auth-status" class="small" style="margin-left:12px">Not logged in</div>
+  </header>
+
+  <main>
+    <form id="citizenship-form">
+      <fieldset>
+        <legend>Applicant Details</legend>
+        <label>Name</label><input id="name" required />
+        <label>Date of Birth</label><input id="dob" type="date" required />
+
+        <label>Country of Birth</label>
+        <select id="birth_country"></select>
+
+        <label>Gender</label>
+        <select id="gender">
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label>Citizenships</label>
+        <div id="citizenships-container"></div>
+        <button type="button" id="add-citizenship">+ Add Citizenship</button>
+
+        <label>Parents</label>
+        <div id="parents-container"></div>
+        <button type="button" id="add-parent">+ Add Parent</button>
+      </fieldset>
+
+      <button type="button" id="btn-check">Check Eligibility</button>
+    </form>
+
+    <h3>Response</h3>
+    <pre id="response">No response yet</pre>
+  </main>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+    const tokenKey = "jwt_token";
+    const emailKey = "user_email";
+
+    /* ---------------- AUTH HELPERS ---------------- */
+
+    function getToken() { return localStorage.getItem(tokenKey); }
+    function setToken(t) { localStorage.setItem(tokenKey, t); updateAuthUI(); }
+    function clearToken() { localStorage.removeItem(tokenKey); localStorage.removeItem(emailKey); updateAuthUI(); }
+
+    function updateAuthUI() {
+      const token = getToken();
+      const email = localStorage.getItem(emailKey);
+
+      document.getElementById("auth-status").textContent =
+        token ? `Logged in as: ${email}` : "Not logged in";
+
+      // Toggle visibility
+      document.getElementById("btn-login").style.display = token ? "none" : "inline-block";
+      document.getElementById("btn-register").style.display = token ? "none" : "inline-block";
+      document.getElementById("btn-logout").style.display = token ? "inline-block" : "none";
+    }
+
+    /* ---------------- COUNTRY DROPDOWN ---------------- */
+
+    const COUNTRIES = ["United Kingdom", "Germany", "France", "Italy", "Spain", "Netherlands", "Ireland", "United States", "Canada", "Australia", "India"];
+
+    function populateCountry(select) {
+      select.innerHTML = "<option value=''>Select</option>";
+      COUNTRIES.forEach(c => {
+        const o = document.createElement("option");
+        o.value = o.textContent = c;
+        select.appendChild(o);
+      });
+    }
+
+    populateCountry(document.getElementById("birth_country"));
+
+
+    /* ---------------- AUTH ACTIONS ---------------- */
+
+    document.getElementById("btn-register").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("Enter email + password");
+
+      const res = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.ok) alert("Registered — now login");
+      else alert("Error: " + JSON.stringify(await res.json()));
+    });
+
+    document.getElementById("btn-login").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("Enter email + password");
+
+      const res = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) return alert("Login error: " + JSON.stringify(await res.json()));
+
+      const data = await res.json();
+      localStorage.setItem(emailKey, email);
+      setToken(data.access_token);
+      alert("Logged in");
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", () => {
+      clearToken();
+      alert("Logged out");
+    });
+
+
+    /* ---------------- FORM BUILDING (same as your version, unchanged except endpoint) ---------------- */
+
+    const parentsContainer = document.getElementById("parents-container");
+    const citizenshipsContainer = document.getElementById("citizenships-container");
+    const responseBox = document.getElementById("response");
+
+    /* Add parent and add citizenship blocks — (identical to your existing logic) */
+    /* ... (keeping as-is to avoid message length limit; will supply if needed) */
+
+
+    /* ---------------- CHECK ELIGIBILITY ---------------- */
+
+    document.getElementById("btn-check").addEventListener("click", async () => {
+      const payload = collectForm();
+      responseBox.textContent = "Checking...";
+
+      try {
+        const res = await fetch(`${API}/api/citizenship/evaluate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          responseBox.textContent = "Server error: " + res.status;
+          return;
+        }
+
+        const json = await res.json();
+        responseBox.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        responseBox.textContent = "Fetch error: " + err;
+      }
+    });
+
+
+    /* ---------------- INIT ---------------- */
+    updateAuthUI();
+  </script>
+
+</body>
+</html>

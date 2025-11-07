@@ -13,9 +13,8 @@ class NewZealandCitizenshipRule(BaseRule):
         reasons: List[str] = []
         
         for parent in person.parents:
-            if parent.country_of_birth.lower() in ("ireland", "republic of ireland"):
-                reasons.append(f"Parent {parent.name} was born in {parent.country_of_birth}.")
-                return RuleResult(True, reasons)
+            if "new zealand" in [c.country.lower() for c in parent.citizenships]:
+                return RuleResult(True, ["Has a New Zealander parent"])
         
         # Check jus soli (born in New Zealand before January 1st 2006)
         if person.country_of_birth.lower() == "new zealand" and person.date_of_birth < date(2006, 1, 1):
