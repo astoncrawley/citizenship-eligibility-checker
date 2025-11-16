@@ -5,11 +5,16 @@ This project analyses the eligibility of a person for citizenships across the gl
 
 
 ## 🗂️ Project Structure
+├── api/
 ├── data/          # Reference datasets (e.g. countries, nationalities, citizenship codes)  
 ├── engine/        # Core evaluation logic and rule engine classes  
-├── models/        # Data models and enums for persons, citizenships, and relationships  
-├── rules/         # Country-specific citizenship eligibility rules  
+├── models/        # Data models and enums for persons, citizenships, and relationships 
+├── profiles/
+├── rules/         # Country-specific citizenship eligibility rules 
+├── static/
 ├── tests/         # Unit and integration tests for engine and rule validation  
+├── user_profiles/
+├── utils/
 ├── main.py        # Entry point for running citizenship evaluations  
 └── README.md      # Project documentation  
 
