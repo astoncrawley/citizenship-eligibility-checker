@@ -9,6 +9,7 @@ from models.results import RuleResult
 class GermanCitizenshipRule(BaseRule):
     """
     Implements German nationality law (simplified but realistic logic):
+    
     Key principles:
     1. **By descent (jus sanguinis)**: A child automatically becomes a German citizen if at least one parent
     was a German citizen at the time of birth. Before 1975, only the father could transmit citizenship if
@@ -21,7 +22,7 @@ class GermanCitizenshipRule(BaseRule):
 
     def check(self, person: Person) -> RuleResult:
         reasons: List[str] = []
-                
+        
         # Check descent
         for parent in person.parents:
             for citizenship in parent.citizenships:
@@ -80,7 +81,7 @@ class GermanCitizenshipRule(BaseRule):
                     reasons.append("Born in Germany after 2000 with at least one parent resident in Germany.")
                     return RuleResult(True, reasons)
             reasons.append("Born in Germany after 2000 but no parent appears resident.")
-        
+           
         # Default not eligible
         if not reasons:
             reasons.append("No German citizen parent or qualifying birth conditions met.")
@@ -98,23 +99,6 @@ class GermanCitizenshipRule(BaseRule):
 #         citizenship = "By descent (jus sanguinis)"
 
 
-# class GermanCitizenshipRule(BaseRule):
-#     """
-#     Implements German nationality law (simplified but realistic logic):
-    
-#     Key principles:
-#     1. **By descent (jus sanguinis)**: A child automatically becomes a German citizen if at least one parent
-#        was a German citizen at the time of birth. Before 1975, only the father could transmit citizenship if
-#        parents were married; since 1975, either parent can.
-#     2. **By birth in Germany (jus soli, since 2000)**: If a child is born in Germany after 1 Jan 2000 and at least
-#        one parent has been legally resident for 8+ years *and* holds permanent residency, the child gains citizenship.
-#     3. **By naturalization**: Not modeled here, but we acknowledge it could be added later.
-#     """
-
-#     country = "Germany"
-
-#     def check(self, person: Person) -> RuleResult:
-#         reasons: List[str] = []
 
 #         # Check descent
 #         for parent in person.parents:
@@ -129,17 +113,3 @@ class GermanCitizenshipRule(BaseRule):
 #                         continue
 #                 else:
 #                     return RuleResult(True, reasons + ["Born after 1975: either parent can transmit citizenship."])
-
-#         # Check jus soli (born in Germany after 2000)
-#         if person.country_of_birth.lower() == "germany" and person.date_of_birth >= date(2000, 1, 1):
-#             # simplified: assume parents have long-term residence if any parent has lived in Germany
-#             for parent in person.parents:
-#                 if parent.country_of_birth.lower() == "germany":
-#                     reasons.append("Born in Germany after 2000 with at least one parent resident in Germany.")
-#                     return RuleResult(True, reasons)
-#             reasons.append("Born in Germany after 2000 but no parent appears resident.")
-
-#         # Default not eligible
-#         if not reasons:
-#             reasons.append("No German citizen parent or qualifying birth conditions met.")
-#         return RuleResult(False, reasons)
