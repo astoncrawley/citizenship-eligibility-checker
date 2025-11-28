@@ -21,4 +21,5 @@ This project analyses the eligibility of a person for citizenships across the gl
 
 ## 🛠️ Tools & Libraries
 - Python (3.10+)  
-- NumPy  
+- NumPy
+- FastAPI
